@@ -1,70 +1,30 @@
 import { ConopAnalysisOutput, LiveSuggestionOutput } from "@/lib/domain";
+import { inferCasualtyContext } from "@/lib/casualty-context";
 
-export function fallbackConopAnalysis(title: string, rawText: string): ConopAnalysisOutput {
+export function fallbackConopAnalysis(title: string, rawText: string, metadata: Record<string, unknown> = {}): ConopAnalysisOutput {
+  const context = inferCasualtyContext({ title, rawText, metadata });
   return {
-    conop_summary: `${title}: Dismounted assault element receives a blast casualty during a short-duration objective raid. Casualty remains responsive but is trending toward hemorrhagic shock without rapid intervention.`,
+    conop_summary: `${title}: ${context.summary}`,
     operational_context: {
-      setting: "Night raid objective breach lane with low ambient light, dust, and intermittent small-arms audio",
+      setting: context.setting,
       time_pressure: "high",
-      resources: ["IFAK", "litter", "radio", "casualty blanket", "headlamp", "limited security team"],
-      constraints: [
-        "Training-only",
-        "Instructor-controlled progression",
-        "Casualty must be treated in place for first 90 seconds",
-        "Movement to CCP delayed until proctor authorizes"
-      ]
+      resources: context.resources,
+      constraints: context.constraints
     },
     scenario_candidates: [
       {
-        scenario_name: `${title} raid-force casualty lane`,
-        moi: "Dismounted blast exposure at compound breach with secondary fragmentation to leg and lower torso",
+        scenario_name: `${title} ${context.scenarioNameSuffix}`,
+        moi: context.moi,
         difficulty: "intermediate",
         wound_set: {
-          injuries: [
-            {
-              label: "Right upper leg junctional hemorrhage",
-              region: "right lower extremity",
-              type: "junctional/fragmentation wound",
-              severity: "severe",
-              visible_findings: [
-                "Bright red bleeding soaking through trouser seam",
-                "Blood pooling under right hip",
-                "Casualty guarding the groin and upper thigh"
-              ],
-              hidden_findings: [
-                "Progressive shock if untreated",
-                "Transient improvement possible after effective packing and pressure"
-              ],
-              expected_interventions: ["Control massive hemorrhage", "Initiate reassessment"],
-              critical_errors: ["Delayed hemorrhage control", "Inadequate wound packing", "Failure to reassess bleeding source"]
-            },
-            {
-              label: "Blast-related chest wall pain without open chest wound",
-              region: "right lower chest",
-              type: "blunt / fragmentation trauma",
-              severity: "moderate",
-              visible_findings: ["Guarding right lower ribs", "Shallow respirations", "Pain with deep breath"],
-              hidden_findings: ["Respiratory fatigue if not reassessed", "Breath sounds remain present initially"],
-              expected_interventions: ["Support breathing", "Initiate reassessment"],
-              critical_errors: ["Ignoring breathing complaints", "Overtreating absent findings without reassessment"]
-            }
-          ]
+          injuries: context.injuries
         },
         patient_presentation: {
-          demeanor: "Alert, anxious, trying to stay in the fight, increasingly pale if bleeding is not controlled",
-          chief_complaint: "My leg is torn up, I feel dizzy, and it hurts to breathe deep.",
-          script_opening_line: "Medic, right leg's hit bad. I'm getting light-headed. Don't leave me here.",
-          answers_to_common_questions: {
-            what_happened: "Charge went off at the breach. I got thrown right and caught fragments low.",
-            where_does_it_hurt: "Upper right leg first. Right side of my chest hurts when I breathe in.",
-            can_you_breathe: "I can answer you, just can't get a full breath without pain.",
-            are_you_bleeding: "Yeah. Leg is pouring and I feel it getting worse."
-          },
-          behavior_cues: [
-            "Grimacing and trying to twist away from the wound",
-            "Voice starts strong but becomes slower if hemorrhage continues",
-            "Attempts to sit up unless directed to stay down"
-          ]
+          demeanor: context.demeanor,
+          chief_complaint: context.chiefComplaint,
+          script_opening_line: context.openingLine,
+          answers_to_common_questions: context.answers,
+          behavior_cues: context.behaviorCues
         },
         vitals_model: {
           stage: "stable",
@@ -180,7 +140,7 @@ export function fallbackConopAnalysis(title: string, rawText: string): ConopAnal
             { name: "reassessment", max_points: 5, notes: "Medic revisits bleeding, breathing, and patient response after each major action." }
           ]
         },
-        missing_inputs: rawText.trim() ? [] : ["Detailed raid route, CASEVAC distance, and friendly security posture were not provided."],
+        missing_inputs: rawText.trim() ? [] : ["Detailed route, casualty location, and support posture were not provided."],
         training_only_disclaimer: "Training use only. Not medical advice for real patients."
       }
     ]

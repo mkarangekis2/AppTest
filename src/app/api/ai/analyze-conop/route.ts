@@ -73,7 +73,7 @@ export async function POST(request: Request) {
       .eq("id", conop.id);
     return Response.json(enriched);
   } catch {
-    const fallback = enrichConopAnalysis(fallbackConopAnalysis(conop.title, conop.raw_text), {
+    const fallback = enrichConopAnalysis(fallbackConopAnalysis(conop.title, conop.raw_text, (conop.metadata_json as Record<string, unknown>) || {}), {
       title: conop.title,
       rawText: conop.raw_text,
       metadata: (conop.metadata_json as Record<string, unknown>) || {}

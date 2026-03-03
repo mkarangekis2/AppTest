@@ -1,3 +1,5 @@
+import { inferCasualtyContext } from "@/lib/casualty-context";
+
 export const PROMPT_VERSION = "2026-03-03.1";
 
 export function buildConopAnalysisPrompt(input: {
@@ -9,6 +11,13 @@ export function buildConopAnalysisPrompt(input: {
     typeof input.metadata.training_level_label === "string" ? input.metadata.training_level_label : "selected trainee";
   const withinScope = JSON.stringify(input.metadata.within_scope || {});
   const notWithinScope = JSON.stringify(input.metadata.not_within_scope || []);
+  const casualtyContext = inferCasualtyContext({
+    title: input.title,
+    rawText: input.rawText,
+    metadata: input.metadata,
+    laneType: typeof input.metadata.lane_type === "string" ? (input.metadata.lane_type as never) : undefined,
+    trainingLevel: typeof input.metadata.training_level === "string" ? (input.metadata.training_level as never) : undefined
+  });
 
   return {
     system:
@@ -26,7 +35,10 @@ export function buildConopAnalysisPrompt(input: {
         `The trainee level is ${trainingLevelLabel}.`,
         `Interventions within scope: ${withinScope}.`,
         `Do not assign or imply out-of-scope interventions: ${notWithinScope}.`,
-        "If a casualty condition would require out-of-scope care, make the expected action recognition, stabilization, and escalation instead of unauthorized treatment."
+        "If a casualty condition would require out-of-scope care, make the expected action recognition, stabilization, and escalation instead of unauthorized treatment.",
+        `Anchor the casualty findings to this CONOP-derived mechanism: ${casualtyContext.moi}.`,
+        `Preferred casualty pattern for this CONOP: ${casualtyContext.injuries.map((injury) => `${injury.label} (${injury.type})`).join("; ")}.`,
+        `Patient demeanor and script should fit this situation summary: ${casualtyContext.summary}.`
       ],
       input
     })

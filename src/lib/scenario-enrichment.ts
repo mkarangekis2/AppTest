@@ -1,4 +1,5 @@
 import { getMedicActionSet } from "@/lib/action-sets";
+import { inferCasualtyContext, isScenarioAlignedToContext } from "@/lib/casualty-context";
 import { ConopAnalysisOutput, LaneType, TrainingLevel } from "@/lib/domain";
 import { getTrainingCapabilityProfile } from "@/lib/training-scope";
 
@@ -20,6 +21,7 @@ export function enrichConopAnalysis(
       ? conop.metadata.training_level_label
       : "Ranger casualty lane";
   const capability = trainingLevel ? getTrainingCapabilityProfile(trainingLevel) : null;
+  const context = inferCasualtyContext({ title: conop.title, rawText: conop.rawText, metadata: conop.metadata, laneType, trainingLevel });
   const medicalAssets = Array.isArray(conop.metadata.medical_assets)
     ? conop.metadata.medical_assets.filter((item): item is string => typeof item === "string")
     : [];
@@ -40,7 +42,8 @@ export function enrichConopAnalysis(
     },
     scenario_candidates: analysis.scenario_candidates.map((candidate, index) => {
       const scenarioName = candidate.scenario_name || `${conop.title} lane ${index + 1}`;
-      const injuries = candidate.wound_set.injuries.map((injury) => ({
+      const alignedInjuries = isScenarioAlignedToContext(candidate, context) ? candidate.wound_set.injuries : context.injuries;
+      const injuries = alignedInjuries.map((injury) => ({
         ...injury,
         visible_findings: ensureArrayItems(injury.visible_findings, [defaultVisibleFinding(injury.label, injury.region)]),
         hidden_findings: ensureArrayItems(injury.hidden_findings, [defaultHiddenFinding(injury.severity)]),
@@ -64,37 +67,44 @@ export function enrichConopAnalysis(
 
       const openingLine =
         candidate.patient_presentation.script_opening_line ||
+        context.openingLine ||
         `Medic, I'm hit. ${candidate.patient_presentation.chief_complaint || "I need help now."}`;
 
       const chiefComplaint =
         candidate.patient_presentation.chief_complaint ||
+        context.chiefComplaint ||
         injuries.map((injury) => injury.label).slice(0, 2).join(" and ");
 
       return {
         ...candidate,
         scenario_name: scenarioName,
-        moi: candidate.moi || buildMoi(conop.rawText, actionSet.name),
+        moi: isScenarioAlignedToContext(candidate, context) ? (candidate.moi || buildMoi(conop.rawText, actionSet.name)) : context.moi,
         wound_set: { injuries },
         patient_presentation: {
           ...candidate.patient_presentation,
-          demeanor: candidate.patient_presentation.demeanor || defaultDemeanor(candidate.difficulty, trainingLevelLabel),
+          demeanor: candidate.patient_presentation.demeanor || context.demeanor || defaultDemeanor(candidate.difficulty, trainingLevelLabel),
           chief_complaint: chiefComplaint,
           script_opening_line: openingLine,
           answers_to_common_questions: {
             what_happened:
               candidate.patient_presentation.answers_to_common_questions.what_happened ||
+              context.answers.what_happened ||
               `We hit the objective and I caught it during the ${actionSet.name.toLowerCase()} phase.`,
             where_does_it_hurt:
               candidate.patient_presentation.answers_to_common_questions.where_does_it_hurt ||
+              context.answers.where_does_it_hurt ||
               chiefComplaint,
             can_you_breathe:
               candidate.patient_presentation.answers_to_common_questions.can_you_breathe ||
+              context.answers.can_you_breathe ||
               "I can answer you, but breathing takes effort.",
             are_you_bleeding:
               candidate.patient_presentation.answers_to_common_questions.are_you_bleeding ||
+              context.answers.are_you_bleeding ||
               "Yes. Check the obvious wounds first."
           },
           behavior_cues: ensureArrayItems(candidate.patient_presentation.behavior_cues, [
+            ...context.behaviorCues,
             "Tracks the medic's voice",
             "Changes tone if condition worsens",
             "Responds differently after effective treatment"
