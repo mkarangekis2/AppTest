@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { LiveSuggestionOutput } from "@/lib/domain";
+import { LiveSuggestionOutput, Vitals } from "@/lib/domain";
 import { buildTreatmentCards, compactVitalsDelta, ScenarioRecord } from "@/lib/scenario-format";
+import { applyVitalsDelta } from "@/lib/session-state";
 
 const QUICK_ACTIONS = [
   "Control massive hemorrhage",
@@ -41,10 +42,18 @@ export function SessionConsole({
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<string | null>(null);
   const [suggestion, setSuggestion] = useState<LiveSuggestionOutput | null>(null);
+  const [displayStage, setDisplayStage] = useState(currentStage);
+  const [displayVitals, setDisplayVitals] = useState(currentVitals as Vitals);
+  const [appliedSuggestion, setAppliedSuggestion] = useState<LiveSuggestionOutput | null>(null);
 
   const treatmentCards = useMemo(() => {
     return buildTreatmentCards(scenario as ScenarioRecord);
   }, [scenario]);
+
+  useEffect(() => {
+    setDisplayStage(currentStage);
+    setDisplayVitals(currentVitals as Vitals);
+  }, [currentStage, currentVitals]);
 
   const configuredActionSet = useMemo(() => {
     const environment = scenario.environment_json as { medic_action_set?: string[] } | undefined;
@@ -136,6 +145,10 @@ export function SessionConsole({
       if (!response.ok) {
         throw new Error(body.error || "Transition failed.");
       }
+      const nextVitals = applyVitalsDelta(displayVitals, suggestion.suggested_state_transition.vitals_delta);
+      setDisplayStage(suggestion.suggested_state_transition.to_stage);
+      setDisplayVitals(nextVitals);
+      setAppliedSuggestion(suggestion);
       router.refresh();
       setSuggestion(null);
     } catch (err) {
@@ -290,14 +303,38 @@ export function SessionConsole({
       <section className="card stack">
         <div className="eyebrow">Patient State / Guidance</div>
         <div className="panel stack">
+          {appliedSuggestion ? (
+            <div className="panel stack" style={{ padding: 14, borderColor: "#6f8a4b", background: "rgba(111, 138, 75, 0.08)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+                <strong>Applied patient update</strong>
+                <span className="badge">{appliedSuggestion.suggested_state_transition.to_stage}</span>
+              </div>
+              <div>{appliedSuggestion.suggested_state_transition.reason}</div>
+              <div className="muted">{compactVitalsDelta(appliedSuggestion.suggested_state_transition.vitals_delta)}</div>
+              <div className="grid two">
+                <div className="panel" style={{ padding: 12 }}>
+                  <div className="eyebrow">Patient now does</div>
+                  <ul style={{ margin: 0, paddingLeft: 18 }}>
+                    {appliedSuggestion.suggested_patient_response.what_patient_does.map((item) => <li key={item}>{item}</li>)}
+                  </ul>
+                </div>
+                <div className="panel" style={{ padding: 12 }}>
+                  <div className="eyebrow">Proctor says</div>
+                  <ul style={{ margin: 0, paddingLeft: 18 }}>
+                    {appliedSuggestion.suggested_patient_response.proctor_verbatim_lines.map((line) => <li key={line}>{line}</li>)}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          ) : null}
           <strong>Current stage</strong>
-          <span className="badge">{currentStage}</span>
+          <span className="badge">{displayStage}</span>
           <div className="table">
             <table>
               <tbody>
-                <tr><th>HR</th><td>{String(currentVitals.hr ?? "-")}</td><th>RR</th><td>{String(currentVitals.rr ?? "-")}</td></tr>
-                <tr><th>SpO2</th><td>{String(currentVitals.spo2 ?? "-")}</td><th>BP</th><td>{`${String(currentVitals.bp_sys ?? "-")}/${String(currentVitals.bp_dia ?? "-")}`}</td></tr>
-                <tr><th>Pain</th><td>{String(currentVitals.pain_0_10 ?? "-")}/10</td><th>Temp C</th><td>{String(currentVitals.temp_c ?? "-")}</td></tr>
+                <tr><th>HR</th><td>{String(displayVitals.hr ?? "-")}</td><th>RR</th><td>{String(displayVitals.rr ?? "-")}</td></tr>
+                <tr><th>SpO2</th><td>{String(displayVitals.spo2 ?? "-")}</td><th>BP</th><td>{`${String(displayVitals.bp_sys ?? "-")}/${String(displayVitals.bp_dia ?? "-")}`}</td></tr>
+                <tr><th>Pain</th><td>{String(displayVitals.pain_0_10 ?? "-")}/10</td><th>Temp C</th><td>{String(displayVitals.temp_c ?? "-")}</td></tr>
               </tbody>
             </table>
           </div>
