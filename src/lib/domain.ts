@@ -3,6 +3,7 @@ export type Difficulty = "basic" | "intermediate" | "advanced";
 export type TimePressure = "low" | "medium" | "high";
 export type ScoreDimensionName = "sequence" | "speed" | "accuracy" | "reassessment";
 export type ScoreMark = "correct" | "incorrect" | "delayed" | "missed" | "info";
+export type LaneType = "point-of-injury" | "prolonged-field-care" | "evacuation" | "mass-casualty";
 
 export type Vitals = {
   hr: number;
@@ -21,6 +22,9 @@ export type ConopAnalysisOutput = {
     time_pressure: TimePressure;
     resources: string[];
     constraints: string[];
+    lane_type?: LaneType;
+    medic_action_set_name?: string;
+    medic_action_set?: string[];
   };
   scenario_candidates: Array<{
     scenario_name: string;

@@ -1,4 +1,5 @@
 type EventRow = {
+  id?: string;
   ts: string;
   type: string;
   payload_json: Record<string, unknown>;
@@ -20,9 +21,10 @@ type Rubric = {
 
 export function buildAar(events: EventRow[]) {
   return events.map((event) => ({
+    id: event.id || `${event.ts}-${event.type}`,
     ts: event.ts,
     type: event.type,
-    summary: JSON.stringify(event.payload_json)
+    summary: summarizeEvent(event)
   }));
 }
 
@@ -69,6 +71,44 @@ export function scoreSession(events: EventRow[], rubric: Rubric, startedAt: stri
     total_possible: baseScore,
     total_awarded: Math.max(0, baseScore - penalties - markPenalty),
     critical_actions: critical,
-    score_marks: marks.length
+    score_marks: marks.length,
+    mark_details: marks.map((event) => ({
+      action: String(event.payload_json.rubric_action || ""),
+      mark: String(event.payload_json.mark || ""),
+      notes: String(event.payload_json.notes || "")
+    })),
+    remediation_points: critical
+      .filter((item) => item.status !== "met")
+      .map((item) =>
+        item.status === "missed"
+          ? `${item.action} was missed. Drill the recognition cues and execution sequence.`
+          : `${item.action} was delayed. Rehearse faster recognition and decisive treatment selection.`
+      )
   };
+}
+
+function summarizeEvent(event: EventRow) {
+  if (event.type === "medic_action") {
+    return `Medic action: ${String(event.payload_json.action || "unknown action")}`;
+  }
+  if (event.type === "score_mark") {
+    return `Score mark: ${String(event.payload_json.rubric_action || "action")} -> ${String(event.payload_json.mark || "unmarked")}`;
+  }
+  if (event.type === "patient_change") {
+    return `Patient change: ${String(event.payload_json.reason || "state updated")}`;
+  }
+  if (event.type === "ai_suggestion") {
+    const suggestion = event.payload_json.suggestion as { recognized_medic_action?: string } | undefined;
+    return `AI suggestion generated for ${suggestion?.recognized_medic_action || "current situation"}`;
+  }
+  if (event.type === "proctor_apply") {
+    return "Proctor accepted an AI-driven patient transition.";
+  }
+  if (event.type === "proctor_override") {
+    return "Proctor overrode an AI suggestion.";
+  }
+  if (event.type === "note") {
+    return String(event.payload_json.note || event.payload_json.message || "Proctor note added.");
+  }
+  return JSON.stringify(event.payload_json);
 }

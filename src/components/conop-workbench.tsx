@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ConopAnalysisOutput } from "@/lib/domain";
+import { ConopAnalysisOutput, LaneType } from "@/lib/domain";
+import { listLaneTypes } from "@/lib/action-sets";
 
 type SaveConopResponse = {
   conop: {
@@ -15,9 +16,14 @@ type SaveConopResponse = {
 
 export function ConopWorkbench() {
   const router = useRouter();
+  const laneTypes = listLaneTypes();
   const [title, setTitle] = useState("");
   const [rawText, setRawText] = useState("");
-  const [metadataText, setMetadataText] = useState("{\n  \"unit\": \"\",\n  \"location\": \"\",\n  \"training_objective\": \"\"\n}");
+  const [laneType, setLaneType] = useState(laneTypes[0]?.laneType || "point-of-injury");
+  const [unit, setUnit] = useState("");
+  const [location, setLocation] = useState("");
+  const [objective, setObjective] = useState("");
+  const [metadataText, setMetadataText] = useState("{\n  \"weather\": \"\",\n  \"enemy_posture\": \"\",\n  \"notes\": \"\"\n}");
   const [conop, setConop] = useState<SaveConopResponse["conop"] | null>(null);
   const [analysis, setAnalysis] = useState<ConopAnalysisOutput | null>(null);
   const [selected, setSelected] = useState(0);
@@ -28,7 +34,13 @@ export function ConopWorkbench() {
     setPending("save");
     setError(null);
     try {
-      const metadata = JSON.parse(metadataText) as Record<string, unknown>;
+      const metadata = {
+        lane_type: laneType,
+        unit,
+        location,
+        training_objective: objective,
+        ...(JSON.parse(metadataText) as Record<string, unknown>)
+      } as Record<string, unknown>;
       const response = await fetch("/api/conops", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -116,8 +128,42 @@ export function ConopWorkbench() {
           <label htmlFor="conop-text">Raw CONOP</label>
           <textarea id="conop-text" value={rawText} onChange={(event) => setRawText(event.target.value)} />
         </div>
+        <div className="grid two">
+          <div className="field">
+            <label htmlFor="lane-type">Lane Type</label>
+            <select id="lane-type" value={laneType} onChange={(event) => setLaneType(event.target.value as LaneType)}>
+              {laneTypes.map((lane) => (
+                <option key={lane.laneType} value={lane.laneType}>
+                  {lane.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="panel" style={{ padding: 12 }}>
+            <div className="eyebrow">Action Set Emphasis</div>
+            <ul style={{ margin: 0, paddingLeft: 18 }}>
+              {(laneTypes.find((lane) => lane.laneType === laneType)?.emphasis || []).map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <div className="grid two">
+          <div className="field">
+            <label htmlFor="conop-unit">Unit</label>
+            <input id="conop-unit" value={unit} onChange={(event) => setUnit(event.target.value)} />
+          </div>
+          <div className="field">
+            <label htmlFor="conop-location">Location</label>
+            <input id="conop-location" value={location} onChange={(event) => setLocation(event.target.value)} />
+          </div>
+        </div>
         <div className="field">
-          <label htmlFor="conop-metadata">Metadata JSON</label>
+          <label htmlFor="conop-objective">Training Objective</label>
+          <input id="conop-objective" value={objective} onChange={(event) => setObjective(event.target.value)} />
+        </div>
+        <div className="field">
+          <label htmlFor="conop-metadata">Additional Metadata JSON</label>
           <textarea id="conop-metadata" value={metadataText} onChange={(event) => setMetadataText(event.target.value)} />
         </div>
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
@@ -160,6 +206,10 @@ export function ConopWorkbench() {
                     <span className="badge">{candidate.difficulty}</span>
                   </div>
                   <div className="muted">{candidate.moi}</div>
+                  <div className="muted">
+                    {(analysis.operational_context.medic_action_set_name || "Action set")} ·{" "}
+                    {(analysis.operational_context.medic_action_set || []).join(", ")}
+                  </div>
                   <div>{candidate.patient_presentation.script_opening_line}</div>
                   <div className="muted">{candidate.training_only_disclaimer}</div>
                 </label>

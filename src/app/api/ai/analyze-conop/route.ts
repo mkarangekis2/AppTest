@@ -3,6 +3,7 @@ import { fallbackConopAnalysis } from "@/lib/ai/fallbacks";
 import { buildConopAnalysisPrompt, PROMPT_VERSION } from "@/lib/ai/prompts";
 import { requestStructuredJson } from "@/lib/ai/openai";
 import { validateConopAnalysisOutput } from "@/lib/ai/validation";
+import { enrichConopAnalysis } from "@/lib/scenario-enrichment";
 import { sha256 } from "@/lib/hash";
 import { parseJsonBody, jsonError } from "@/lib/http";
 
@@ -55,19 +56,28 @@ export async function POST(request: Request) {
     if (!validateConopAnalysisOutput(payload)) {
       return jsonError("AI response did not match CONOP_ANALYSIS_OUTPUT.", 502);
     }
+    const enriched = enrichConopAnalysis(payload, {
+      title: conop.title,
+      rawText: conop.raw_text,
+      metadata: (conop.metadata_json as Record<string, unknown>) || {}
+    });
     await supabase
       .from("conops")
       .update({
         conop_hash: cacheHash,
-        analysis_cache_json: payload,
+        analysis_cache_json: enriched,
         analysis_cache_model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
         analysis_cache_prompt_version: PROMPT_VERSION,
         analysis_generated_at: new Date().toISOString()
       })
       .eq("id", conop.id);
-    return Response.json(payload);
+    return Response.json(enriched);
   } catch {
-    const fallback = fallbackConopAnalysis(conop.title, conop.raw_text);
+    const fallback = enrichConopAnalysis(fallbackConopAnalysis(conop.title, conop.raw_text), {
+      title: conop.title,
+      rawText: conop.raw_text,
+      metadata: (conop.metadata_json as Record<string, unknown>) || {}
+    });
     await supabase
       .from("conops")
       .update({

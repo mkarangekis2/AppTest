@@ -1,4 +1,4 @@
-export const PROMPT_VERSION = "2026-03-02.1";
+export const PROMPT_VERSION = "2026-03-03.1";
 
 export function buildConopAnalysisPrompt(input: {
   title: string;
@@ -15,7 +15,9 @@ export function buildConopAnalysisPrompt(input: {
         "Use only the provided input.",
         "Keep proctor lines concise and realistic.",
         "Bound physiologic changes to plausible training transitions.",
-        "Include a training_only_disclaimer in every candidate."
+        "Include a training_only_disclaimer in every candidate.",
+        "Make critical actions concrete and verb-first.",
+        "Write progression rules that show what improves after correct treatment and what worsens after missed reassessment."
       ],
       input
     })

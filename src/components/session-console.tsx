@@ -46,6 +46,11 @@ export function SessionConsole({
     return buildTreatmentCards(scenario as ScenarioRecord);
   }, [scenario]);
 
+  const configuredActionSet = useMemo(() => {
+    const environment = scenario.environment_json as { medic_action_set?: string[] } | undefined;
+    return environment?.medic_action_set?.length ? environment.medic_action_set : [...QUICK_ACTIONS];
+  }, [scenario]);
+
   const completedActions = useMemo(() => {
     return new Set(
       events
@@ -167,7 +172,7 @@ export function SessionConsole({
       <section className="card stack">
         <div className="eyebrow">Treatment Checklist</div>
         <div className="stack">
-          {(treatmentCards.length ? treatmentCards : QUICK_ACTIONS.map((action) => ({
+          {(treatmentCards.length ? treatmentCards : configuredActionSet.map((action) => ({
             action,
             deadlineSec: null,
             failIfMissed: false,
@@ -369,7 +374,7 @@ export function SessionConsole({
                 </tr>
               </thead>
               <tbody>
-                {(treatmentCards.length ? treatmentCards.map((item) => item.action) : [...QUICK_ACTIONS]).map((action) => (
+                {(treatmentCards.length ? treatmentCards.map((item) => item.action) : configuredActionSet).map((action) => (
                   <tr key={action}>
                     <td>{action}</td>
                     <td>{completedActions.has(action) ? "Yes" : "No"}</td>

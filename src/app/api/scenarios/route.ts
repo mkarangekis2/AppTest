@@ -25,6 +25,15 @@ export async function POST(request: Request) {
     return jsonError("Invalid candidate index.");
   }
 
+  const { data: conop } = await supabase.from("conops").select("metadata_json").eq("id", body.conopId).maybeSingle();
+  const conopMetadata = (conop?.metadata_json as Record<string, unknown> | undefined) || {};
+  const environment = {
+    ...body.analysis.operational_context,
+    lane_type: conopMetadata.lane_type ?? body.analysis.operational_context.lane_type,
+    medic_action_set_name: body.analysis.operational_context.medic_action_set_name,
+    medic_action_set: body.analysis.operational_context.medic_action_set
+  };
+
   const { data, error } = await supabase
     .from("scenarios")
     .insert({
@@ -33,7 +42,7 @@ export async function POST(request: Request) {
       status: "draft",
       moi: candidate.moi,
       difficulty: candidate.difficulty,
-      environment_json: body.analysis.operational_context,
+      environment_json: environment,
       rubric_json: candidate.rubric,
       wound_set_json: candidate.wound_set,
       presentation_script_json: candidate.patient_presentation,
