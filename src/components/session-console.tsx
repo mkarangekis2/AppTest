@@ -22,6 +22,25 @@ type EventRow = {
   payload_json: Record<string, unknown>;
 };
 
+type ActionStatus = "correct" | "delayed" | "missed" | null;
+
+type VitalsDelta = LiveSuggestionOutput["suggested_state_transition"]["vitals_delta"];
+
+const STAGE_STYLES: Record<string, { border: string; background: string }> = {
+  stable: { border: "#6f8a4b", background: "rgba(111, 138, 75, 0.08)" },
+  worsening: { border: "#b9893f", background: "rgba(185, 137, 63, 0.12)" },
+  critical: { border: "#9a4b43", background: "rgba(154, 75, 67, 0.12)" }
+};
+
+const VITAL_LABELS: Array<{ key: keyof VitalsDelta; label: string; improveOnDecrease?: boolean }> = [
+  { key: "hr", label: "HR", improveOnDecrease: true },
+  { key: "rr", label: "RR", improveOnDecrease: true },
+  { key: "spo2", label: "SpO2" },
+  { key: "bp_sys", label: "BP Sys" },
+  { key: "bp_dia", label: "BP Dia" },
+  { key: "pain_0_10", label: "Pain", improveOnDecrease: true }
+];
+
 export function SessionConsole({
   sessionId,
   scenario,
@@ -60,24 +79,39 @@ export function SessionConsole({
     return environment?.medic_action_set?.length ? environment.medic_action_set : [...QUICK_ACTIONS];
   }, [scenario]);
 
-  const completedActions = useMemo(() => {
-    return new Set(
-      events
-        .filter((event) => event.type === "medic_action")
-        .map((event) => String(event.payload_json.action || ""))
-    );
+  const actionStates = useMemo(() => {
+    const map = new Map<string, { mark: ActionStatus; ts: string | null }>();
+
+    for (const event of events) {
+      if (event.type === "score_mark") {
+        const action = String(event.payload_json.rubric_action || "");
+        const mark = event.payload_json.mark;
+        if (!action || (mark !== "correct" && mark !== "delayed" && mark !== "missed")) {
+          continue;
+        }
+        map.set(action, { mark, ts: event.ts });
+      }
+
+      if (event.type === "score_reset") {
+        const action = String(event.payload_json.rubric_action || "");
+        if (action) {
+          map.set(action, { mark: null, ts: null });
+        }
+      }
+    }
+
+    return map;
   }, [events]);
 
   const scoreMarks = useMemo(() => {
     const map = new Map<string, string>();
-    for (const event of events.filter((item) => item.type === "score_mark")) {
-      const action = String(event.payload_json.rubric_action || "");
-      if (action) {
-        map.set(action, String(event.payload_json.mark || ""));
+    for (const [action, state] of actionStates.entries()) {
+      if (state.mark) {
+        map.set(action, state.mark);
       }
     }
     return map;
-  }, [events]);
+  }, [actionStates]);
 
   const latestChanges = useMemo(() => {
     return events
@@ -158,8 +192,15 @@ export function SessionConsole({
     }
   }
 
-  async function markScore(action: string, mark: LiveSuggestionOutput["scoring_suggestion"]["mark"]) {
+  async function markScore(action: string, mark: ActionStatus) {
+    if (!mark) {
+      return;
+    }
     await logEvent("score_mark", { rubric_action: action, mark, source: "proctor-confirmed" });
+  }
+
+  async function resetScore(action: string) {
+    await logEvent("score_reset", { rubric_action: action, source: "proctor-reset" });
   }
 
   async function endSession() {
@@ -180,6 +221,9 @@ export function SessionConsole({
     }
   }
 
+  const appliedStageStyle = STAGE_STYLES[displayStage] || STAGE_STYLES.worsening;
+  const appliedDelta = appliedSuggestion?.suggested_state_transition.vitals_delta;
+
   return (
     <div className="split">
       <section className="card stack">
@@ -195,21 +239,12 @@ export function SessionConsole({
             ifMissed: [],
             stageEffects: []
           }))).map((card) => {
-            const isChecked = completedActions.has(card.action);
-            const scoreMark = scoreMarks.get(card.action);
+            const scoreMark = scoreMarks.get(card.action) as ActionStatus;
 
             return (
               <div key={card.action} className="panel" style={{ padding: 14 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-                  <label style={{ display: "flex", gap: 10, alignItems: "center", fontWeight: 700 }}>
-                    <input
-                      type="checkbox"
-                      checked={isChecked}
-                      disabled={Boolean(endedAt) || pending !== null || isChecked}
-                      onChange={() => logEvent("medic_action", { action: card.action, source: "treatment-checklist" })}
-                    />
-                    {card.action}
-                  </label>
+                  <strong>{card.action}</strong>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     {card.deadlineSec !== null ? <span className="badge">Due {card.deadlineSec}s</span> : null}
                     {card.failIfMissed ? <span className="badge">Critical</span> : null}
@@ -235,15 +270,40 @@ export function SessionConsole({
                   </div>
                 </div>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  <button className="secondary" disabled={Boolean(endedAt) || pending !== null} onClick={() => markScore(card.action, "correct")}>
+                  <button
+                    className={scoreMark === "correct" ? "" : "secondary"}
+                    disabled={Boolean(endedAt) || pending !== null}
+                    onClick={() => markScore(card.action, "correct")}
+                  >
                     Correct
                   </button>
-                  <button className="secondary" disabled={Boolean(endedAt) || pending !== null} onClick={() => markScore(card.action, "delayed")}>
+                  <button
+                    className={scoreMark === "delayed" ? "" : "secondary"}
+                    disabled={Boolean(endedAt) || pending !== null}
+                    onClick={() => markScore(card.action, "delayed")}
+                  >
                     Delayed
                   </button>
-                  <button className="secondary" disabled={Boolean(endedAt) || pending !== null} onClick={() => markScore(card.action, "missed")}>
+                  <button
+                    className={scoreMark === "missed" ? "danger" : "secondary"}
+                    disabled={Boolean(endedAt) || pending !== null}
+                    onClick={() => markScore(card.action, "missed")}
+                  >
                     Missed
                   </button>
+                  <button
+                    className="secondary"
+                    disabled={Boolean(endedAt) || pending !== null || !scoreMark}
+                    onClick={() => resetScore(card.action)}
+                  >
+                    Undo
+                  </button>
+                </div>
+                <div className="muted">
+                  {scoreMark === "correct" ? "Recorded as completed on time." : null}
+                  {scoreMark === "delayed" ? "Recorded as completed, but delayed." : null}
+                  {scoreMark === "missed" ? "Recorded as missed / not completed." : null}
+                  {!scoreMark ? "No result recorded yet." : null}
                 </div>
               </div>
             );
@@ -304,7 +364,7 @@ export function SessionConsole({
         <div className="eyebrow">Patient State / Guidance</div>
         <div className="panel stack">
           {appliedSuggestion ? (
-            <div className="panel stack" style={{ padding: 14, borderColor: "#6f8a4b", background: "rgba(111, 138, 75, 0.08)" }}>
+            <div className="panel stack" style={{ padding: 14, borderColor: appliedStageStyle.border, background: appliedStageStyle.background }}>
               <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
                 <strong>Applied patient update</strong>
                 <span className="badge">{appliedSuggestion.suggested_state_transition.to_stage}</span>
@@ -325,6 +385,11 @@ export function SessionConsole({
                   </ul>
                 </div>
               </div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {VITAL_LABELS.map((item) => (
+                  <VitalsTrendChip key={item.key} label={item.label} value={appliedSuggestion.suggested_state_transition.vitals_delta[item.key]} improveOnDecrease={item.improveOnDecrease} />
+                ))}
+              </div>
             </div>
           ) : null}
           <strong>Current stage</strong>
@@ -333,10 +398,35 @@ export function SessionConsole({
             <table>
               <tbody>
                 <tr><th>HR</th><td>{String(displayVitals.hr ?? "-")}</td><th>RR</th><td>{String(displayVitals.rr ?? "-")}</td></tr>
-                <tr><th>SpO2</th><td>{String(displayVitals.spo2 ?? "-")}</td><th>BP</th><td>{`${String(displayVitals.bp_sys ?? "-")}/${String(displayVitals.bp_dia ?? "-")}`}</td></tr>
-                <tr><th>Pain</th><td>{String(displayVitals.pain_0_10 ?? "-")}/10</td><th>Temp C</th><td>{String(displayVitals.temp_c ?? "-")}</td></tr>
+                <tr>
+                  <th>SpO2</th>
+                  <td>
+                    {String(displayVitals.spo2 ?? "-")}
+                    {appliedDelta ? <InlineVitalsDelta value={appliedDelta.spo2} improveOnDecrease={false} /> : null}
+                  </td>
+                  <th>BP</th>
+                  <td>
+                    {`${String(displayVitals.bp_sys ?? "-")}/${String(displayVitals.bp_dia ?? "-")}`}
+                    {appliedDelta ? <InlineBloodPressureDelta sys={appliedDelta.bp_sys} dia={appliedDelta.bp_dia} /> : null}
+                  </td>
+                </tr>
+                <tr>
+                  <th>Pain</th>
+                  <td>
+                    {String(displayVitals.pain_0_10 ?? "-")}/10
+                    {appliedDelta ? <InlineVitalsDelta value={appliedDelta.pain_0_10} improveOnDecrease /> : null}
+                  </td>
+                  <th>Temp C</th>
+                  <td>{String(displayVitals.temp_c ?? "-")}</td>
+                </tr>
               </tbody>
             </table>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 8 }}>
+            <VitalsSnapshot label="HR" value={displayVitals.hr} delta={appliedDelta?.hr} improveOnDecrease />
+            <VitalsSnapshot label="RR" value={displayVitals.rr} delta={appliedDelta?.rr} improveOnDecrease />
+            <VitalsSnapshot label="SpO2" value={displayVitals.spo2} delta={appliedDelta?.spo2} />
+            <VitalsSnapshot label="Pain" value={displayVitals.pain_0_10} delta={appliedDelta?.pain_0_10} improveOnDecrease suffix="/10" />
           </div>
           <strong>Recent patient changes</strong>
           <ul style={{ margin: 0, paddingLeft: 18 }}>
@@ -414,7 +504,7 @@ export function SessionConsole({
                 {(treatmentCards.length ? treatmentCards.map((item) => item.action) : configuredActionSet).map((action) => (
                   <tr key={action}>
                     <td>{action}</td>
-                    <td>{completedActions.has(action) ? "Yes" : "No"}</td>
+                    <td>{scoreMarks.get(action) === "correct" || scoreMarks.get(action) === "delayed" ? "Yes" : "No"}</td>
                     <td>{scoreMarks.get(action) || "Unmarked"}</td>
                   </tr>
                 ))}
@@ -425,4 +515,118 @@ export function SessionConsole({
       </section>
     </div>
   );
+}
+
+function VitalsSnapshot({
+  label,
+  value,
+  delta,
+  improveOnDecrease = false,
+  suffix = ""
+}: {
+  label: string;
+  value: number;
+  delta?: number;
+  improveOnDecrease?: boolean;
+  suffix?: string;
+}) {
+  const tone = getDeltaTone(delta, improveOnDecrease);
+
+  return (
+    <div className="panel" style={{ padding: 10 }}>
+      <div className="eyebrow">{label}</div>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+        <strong style={{ fontSize: "1.15rem" }}>{value}{suffix}</strong>
+        {delta !== undefined ? <InlineVitalsDelta value={delta} improveOnDecrease={improveOnDecrease} /> : null}
+      </div>
+      <div className="muted">{tone.label}</div>
+    </div>
+  );
+}
+
+function VitalsTrendChip({
+  label,
+  value,
+  improveOnDecrease = false
+}: {
+  label: string;
+  value: number;
+  improveOnDecrease?: boolean;
+}) {
+  const tone = getDeltaTone(value, improveOnDecrease);
+
+  return (
+    <span
+      className="badge"
+      style={{
+        borderColor: tone.border,
+        background: tone.background,
+        color: tone.text
+      }}
+    >
+      {label} {formatSignedNumber(value)}
+    </span>
+  );
+}
+
+function InlineVitalsDelta({
+  value,
+  improveOnDecrease = false
+}: {
+  value: number;
+  improveOnDecrease?: boolean;
+}) {
+  const tone = getDeltaTone(value, improveOnDecrease);
+
+  return (
+    <span style={{ marginLeft: 6, color: tone.text, fontWeight: 700 }}>
+      {formatSignedNumber(value)}
+    </span>
+  );
+}
+
+function InlineBloodPressureDelta({ sys, dia }: { sys: number; dia: number }) {
+  const combined = sys + dia;
+  const tone = getDeltaTone(combined, false);
+
+  return (
+    <span style={{ marginLeft: 6, color: tone.text, fontWeight: 700 }}>
+      ({formatSignedNumber(sys)}/{formatSignedNumber(dia)})
+    </span>
+  );
+}
+
+function getDeltaTone(value: number | undefined, improveOnDecrease: boolean) {
+  if (value === undefined || value === 0) {
+    return {
+      label: "No immediate change",
+      text: "#6b6257",
+      border: "rgba(107, 98, 87, 0.25)",
+      background: "rgba(107, 98, 87, 0.08)"
+    };
+  }
+
+  const isImprovement = improveOnDecrease ? value < 0 : value > 0;
+
+  return isImprovement
+    ? {
+        label: "Improving response",
+        text: "#5f7a3f",
+        border: "rgba(95, 122, 63, 0.3)",
+        background: "rgba(95, 122, 63, 0.12)"
+      }
+    : {
+        label: "Worsening response",
+        text: "#9a4b43",
+        border: "rgba(154, 75, 67, 0.3)",
+        background: "rgba(154, 75, 67, 0.12)"
+      };
+}
+
+function formatSignedNumber(value: number) {
+  if (value === 0) {
+    return "0";
+  }
+
+  return value > 0 ? `+${value}` : String(value);
 }

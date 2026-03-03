@@ -30,14 +30,23 @@ export function buildAar(events: EventRow[]) {
 
 export function scoreSession(events: EventRow[], rubric: Rubric, startedAt: string) {
   const startTime = new Date(startedAt).getTime();
-  const actionEvents = events.filter((event) => event.type === "medic_action");
-  const marks = events.filter((event) => event.type === "score_mark");
+  const latestMarks = buildLatestMarks(events);
+  const marks = Array.from(latestMarks.entries())
+    .filter(([, value]) => value.mark !== null)
+    .map(([action, value]) => ({
+      action,
+      mark: value.mark as string,
+      ts: value.ts,
+      notes: value.notes
+    }));
 
   const critical = rubric.critical_actions.map((item) => {
-    const matched = actionEvents.find((event) => event.payload_json.action === item.action);
-    const elapsedSec = matched ? Math.max(0, Math.round((new Date(matched.ts).getTime() - startTime) / 1000)) : null;
-    const missed = elapsedSec === null;
-    const delayed = elapsedSec !== null && elapsedSec > item.must_occur_by_sec;
+    const matched = latestMarks.get(item.action);
+    const explicitMiss = matched?.mark === "missed";
+    const completed = matched?.mark === "correct" || matched?.mark === "delayed";
+    const elapsedSec = completed && matched?.ts ? Math.max(0, Math.round((new Date(matched.ts).getTime() - startTime) / 1000)) : null;
+    const missed = explicitMiss || elapsedSec === null;
+    const delayed = !missed && elapsedSec !== null && elapsedSec > item.must_occur_by_sec;
 
     return {
       action: item.action,
@@ -60,7 +69,7 @@ export function scoreSession(events: EventRow[], rubric: Rubric, startedAt: stri
   }, 0);
 
   const markPenalty = marks.reduce((sum, event) => {
-    const mark = event.payload_json.mark;
+    const mark = event.mark;
     if (mark === "incorrect" || mark === "missed") {
       return sum + 1;
     }
@@ -73,9 +82,9 @@ export function scoreSession(events: EventRow[], rubric: Rubric, startedAt: stri
     critical_actions: critical,
     score_marks: marks.length,
     mark_details: marks.map((event) => ({
-      action: String(event.payload_json.rubric_action || ""),
-      mark: String(event.payload_json.mark || ""),
-      notes: String(event.payload_json.notes || "")
+      action: event.action,
+      mark: event.mark,
+      notes: event.notes
     })),
     remediation_points: critical
       .filter((item) => item.status !== "met")
@@ -94,6 +103,9 @@ function summarizeEvent(event: EventRow) {
   if (event.type === "score_mark") {
     return `Score mark: ${String(event.payload_json.rubric_action || "action")} -> ${String(event.payload_json.mark || "unmarked")}`;
   }
+  if (event.type === "score_reset") {
+    return `Score reset: ${String(event.payload_json.rubric_action || "action")} cleared`;
+  }
   if (event.type === "patient_change") {
     return `Patient change: ${String(event.payload_json.reason || "state updated")}`;
   }
@@ -111,4 +123,38 @@ function summarizeEvent(event: EventRow) {
     return String(event.payload_json.note || event.payload_json.message || "Proctor note added.");
   }
   return JSON.stringify(event.payload_json);
+}
+
+function buildLatestMarks(events: EventRow[]) {
+  const map = new Map<string, { mark: string | null; ts: string | null; notes: string }>();
+
+  for (const event of events) {
+    if (event.type === "score_mark") {
+      const action = String(event.payload_json.rubric_action || "");
+      if (!action) {
+        continue;
+      }
+
+      map.set(action, {
+        mark: String(event.payload_json.mark || ""),
+        ts: event.ts,
+        notes: String(event.payload_json.notes || "")
+      });
+    }
+
+    if (event.type === "score_reset") {
+      const action = String(event.payload_json.rubric_action || "");
+      if (!action) {
+        continue;
+      }
+
+      map.set(action, {
+        mark: null,
+        ts: null,
+        notes: ""
+      });
+    }
+  }
+
+  return map;
 }
