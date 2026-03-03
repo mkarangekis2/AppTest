@@ -1,5 +1,6 @@
 import { getMedicActionSet } from "@/lib/action-sets";
-import { ConopAnalysisOutput, LaneType } from "@/lib/domain";
+import { ConopAnalysisOutput, LaneType, TrainingLevel } from "@/lib/domain";
+import { getTrainingCapabilityProfile } from "@/lib/training-scope";
 
 type ConopMetadata = Record<string, unknown>;
 
@@ -12,11 +13,13 @@ export function enrichConopAnalysis(
   }
 ): ConopAnalysisOutput {
   const laneType = normalizeLaneType(conop.metadata.lane_type);
-  const actionSet = getMedicActionSet(laneType);
+  const trainingLevel = normalizeTrainingLevel(conop.metadata.training_level);
+  const actionSet = getMedicActionSet(laneType, trainingLevel);
   const trainingLevelLabel =
     typeof conop.metadata.training_level_label === "string" && conop.metadata.training_level_label
       ? conop.metadata.training_level_label
       : "Ranger casualty lane";
+  const capability = trainingLevel ? getTrainingCapabilityProfile(trainingLevel) : null;
   const medicalAssets = Array.isArray(conop.metadata.medical_assets)
     ? conop.metadata.medical_assets.filter((item): item is string => typeof item === "string")
     : [];
@@ -42,10 +45,21 @@ export function enrichConopAnalysis(
         visible_findings: ensureArrayItems(injury.visible_findings, [defaultVisibleFinding(injury.label, injury.region)]),
         hidden_findings: ensureArrayItems(injury.hidden_findings, [defaultHiddenFinding(injury.severity)]),
         expected_interventions: ensureArrayItems(
-          injury.expected_interventions,
-          actionSet.actions.filter((action) => action.toLowerCase().includes(keywordForInjury(injury.label, injury.type)))
+          filterScopedInterventions(
+            ensureArrayItems(
+              injury.expected_interventions,
+              actionSet.actions.filter((action) => action.toLowerCase().includes(keywordForInjury(injury.label, injury.type)))
+            ),
+            capability?.allowedInterventions || []
+          ),
+          capability?.supervisionRules.length ? [`Escalate to ${capability.shortLabel} authority when findings exceed trainee scope.`] : []
         ),
-        critical_errors: ensureArrayItems(injury.critical_errors, [`Failure to address ${injury.label.toLowerCase()}`])
+        critical_errors: ensureArrayItems(injury.critical_errors, [
+          `Failure to address ${injury.label.toLowerCase()}`,
+          ...(capability?.notWithinScope.length
+            ? [`Attempting out-of-scope treatment instead of escalation (${capability.notWithinScope.slice(0, 2).join(", ")})`]
+            : [])
+        ])
       }));
 
       const openingLine =
@@ -95,7 +109,7 @@ export function enrichConopAnalysis(
           critical_actions: normalizeCriticalActions(candidate.rubric.critical_actions, injuries, actionSet.actions),
           scoring_dimensions: candidate.rubric.scoring_dimensions
         },
-        missing_inputs: candidate.missing_inputs,
+        missing_inputs: ensureArrayItems(candidate.missing_inputs, capability?.supervisionRules || []),
         training_only_disclaimer: candidate.training_only_disclaimer || "Training use only. Not medical advice for real patients."
       };
     })
@@ -115,6 +129,18 @@ function normalizeLaneType(value: unknown): LaneType | undefined {
     normalized === "mass-casualty"
   ) {
     return normalized;
+  }
+
+  return undefined;
+}
+
+function normalizeTrainingLevel(value: unknown): TrainingLevel | undefined {
+  if (
+    value === "ranger-first-responder" ||
+    value === "advanced-ranger-first-responder" ||
+    value === "ranger-medic"
+  ) {
+    return value;
   }
 
   return undefined;
@@ -238,4 +264,16 @@ function keywordForInjury(label: string, type: string) {
 
 function sameText(left: string, right: string) {
   return left.toLowerCase().trim() === right.toLowerCase().trim();
+}
+
+function filterScopedInterventions(interventions: string[], allowed: string[]) {
+  if (!allowed.length) {
+    return interventions;
+  }
+
+  const filtered = interventions.filter((intervention) =>
+    allowed.some((allowedItem) => intervention.toLowerCase().includes(allowedItem.toLowerCase()) || allowedItem.toLowerCase().includes(intervention.toLowerCase()))
+  );
+
+  return filtered.length ? filtered : interventions.filter((item) => /reassessment|movement|hemorrhage|airway|breathing/i.test(item));
 }

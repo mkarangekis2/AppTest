@@ -1,4 +1,5 @@
-import { LaneType } from "@/lib/domain";
+import { LaneType, TrainingLevel } from "@/lib/domain";
+import { getScopedMedicActions } from "@/lib/training-scope";
 
 export type MedicActionSet = {
   laneType: LaneType;
@@ -64,12 +65,18 @@ const ACTION_SETS: Record<LaneType, MedicActionSet> = {
   }
 };
 
-export function getMedicActionSet(laneType?: string | null): MedicActionSet {
+export function getMedicActionSet(laneType?: string | null, trainingLevel?: TrainingLevel): MedicActionSet {
   if (laneType && laneType in ACTION_SETS) {
-    return ACTION_SETS[laneType as LaneType];
+    const set = ACTION_SETS[laneType as LaneType];
+    return trainingLevel
+      ? { ...set, actions: getScopedMedicActions(trainingLevel, set.laneType, set.actions) }
+      : set;
   }
 
-  return ACTION_SETS["point-of-injury"];
+  const fallback = ACTION_SETS["point-of-injury"];
+  return trainingLevel
+    ? { ...fallback, actions: getScopedMedicActions(trainingLevel, fallback.laneType, fallback.actions) }
+    : fallback;
 }
 
 export function listLaneTypes() {

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ConopAnalysisOutput, LaneType, TrainingLevel } from "@/lib/domain";
 import { listLaneTypes } from "@/lib/action-sets";
 import { generateRandomConop, listTrainingLevels } from "@/lib/conop-generator";
+import { getTrainingCapabilityProfile } from "@/lib/training-scope";
 
 type SaveConopResponse = {
   conop: {
@@ -52,8 +53,20 @@ export function ConopWorkbench() {
     setPending("save");
     setError(null);
     try {
+      const capability = getTrainingCapabilityProfile(trainingLevel);
       const metadata = {
         lane_type: laneType,
+        training_level: trainingLevel,
+        training_level_label: capability.label,
+        authority_summary: capability.authoritySummary,
+        within_scope: {
+          circulation: capability.circulation,
+          airway: capability.airway,
+          breathing: capability.breathing
+        },
+        not_within_scope: capability.notWithinScope,
+        supervision_rules: capability.supervisionRules,
+        medical_assets: capability.medicalAssets,
         unit,
         location,
         training_objective: objective,

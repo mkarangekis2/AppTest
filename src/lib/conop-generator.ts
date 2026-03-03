@@ -1,5 +1,6 @@
 import { getMedicActionSet } from "@/lib/action-sets";
 import { LaneType, TrainingLevel } from "@/lib/domain";
+import { getTrainingCapabilityProfile, listTrainingCapabilitySummaries } from "@/lib/training-scope";
 
 type GeneratedConop = {
   title: string;
@@ -63,66 +64,33 @@ const missionTemplates: Array<{
   }
 ];
 
-const trainingProfiles: Record<
-  TrainingLevel,
-  {
-    label: string;
-    treatmentWindow: string;
-    medicalAssets: string[];
-    focus: string[];
-    commandExpectations: string[];
-  }
-> = {
-  "ranger-first-responder": {
-    label: "Ranger First Responder",
-    treatmentWindow: "first lifesaving actions expected in 60 seconds with rapid handoff mindset",
-    medicalAssets: ["IFAK only", "buddy aid support", "no advanced medication expected"],
-    focus: ["hemorrhage control", "airway basics", "movement preparation"],
-    commandExpectations: ["simple casualty commands", "request medic support early", "announce major findings out loud"]
-  },
-  "advanced-ranger-first-responder": {
-    label: "Advanced Ranger First Responder",
-    treatmentWindow: "treat in place for 2-4 minutes before movement decision",
-    medicalAssets: ["expanded aid pouch", "supplemental airway adjuncts", "limited monitoring capability"],
-    focus: ["hemorrhage control", "breathing reassessment", "casualty packaging"],
-    commandExpectations: ["direct nearby Rangers", "repeat reassessment findings", "communicate treatment priorities to security lead"]
-  },
-  "ranger-medic": {
-    label: "Ranger Medic",
-    treatmentWindow: "responsible for immediate control plus sustained reassessment through CCP handoff",
-    medicalAssets: ["medic aid bag", "expanded airway tools", "additional documentation / handoff requirements"],
-    focus: ["integrated MARCH sequence", "serial reassessment", "handoff preparation"],
-    commandExpectations: ["control the treatment space", "delegate tasks", "prepare formal casualty handoff"]
-  }
-};
-
 export function listTrainingLevels() {
-  return Object.entries(trainingProfiles).map(([value, profile]) => ({
-    value: value as TrainingLevel,
-    label: profile.label,
-    focus: profile.focus
-  }));
+  return listTrainingCapabilitySummaries();
 }
 
 export function generateRandomConop(trainingLevel: TrainingLevel): GeneratedConop {
   const template = pick(missionTemplates);
-  const profile = trainingProfiles[trainingLevel];
+  const profile = getTrainingCapabilityProfile(trainingLevel);
   const unit = pick(units);
   const location = pick(locations);
   const currentWeather = pick(weather);
   const enemyPosture = pick(enemyPostures);
-  const actionSet = getMedicActionSet(template.laneType);
+  const actionSet = getMedicActionSet(template.laneType, trainingLevel);
   const title = `${profile.label} ${template.laneType.replace(/-/g, " ")} lane for ${unit}`;
+  const scopedInjuries = scopedInjuriesForLevel(template.injuries, profile.preferredInjuryPatterns);
 
   const rawText = [
     `${unit} conducts a Ranger platoon mission rehearsal at the ${location}.`,
     `Mission objective: ${template.objective}.`,
     `During execution, the primary training casualty event occurs when the ${template.casualtyMechanism}.`,
     `Environmental conditions are ${currentWeather}, and enemy posture is assessed as: ${enemyPosture}.`,
-    `Expected casualty problems include ${template.injuries.join(", ")}.`,
+    `Expected casualty problems include ${scopedInjuries.join(", ")}.`,
     `Medical assets on hand: ${[...template.assets, ...profile.medicalAssets].join(", ")}.`,
     `Training audience is ${profile.label}; ${profile.treatmentWindow}.`,
     `Evaluation focus: ${profile.focus.join(", ")}.`,
+    `Authority model: ${profile.authoritySummary}.`,
+    `Interventions within scope include: ${[...profile.circulation, ...profile.airway, ...profile.breathing].join(", ")}.`,
+    profile.notWithinScope.length ? `Not within scope: ${profile.notWithinScope.join(", ")}.` : "No additional scope exclusions beyond clinical judgment.",
     `Command-and-control expectations: ${profile.commandExpectations.join(", ")}.`,
     `Lane action set should emphasize ${actionSet.actions.join(", ")}.`,
     "AI outputs must remain training-only, proctor controlled, and scenario bounded."
@@ -142,11 +110,23 @@ export function generateRandomConop(trainingLevel: TrainingLevel): GeneratedCono
       enemy_posture: enemyPosture,
       medical_assets: [...template.assets, ...profile.medicalAssets],
       treatment_time_window: profile.treatmentWindow,
-      injury_focus: template.injuries,
+      injury_focus: scopedInjuries,
       command_expectations: profile.commandExpectations,
+      authority_summary: profile.authoritySummary,
+      within_scope: {
+        circulation: profile.circulation,
+        airway: profile.airway,
+        breathing: profile.breathing
+      },
+      not_within_scope: profile.notWithinScope,
+      supervision_rules: profile.supervisionRules,
       notes: "Synthetic training CONOP generated for scenario drafting."
     }
   };
+}
+
+function scopedInjuriesForLevel(baseInjuries: string[], scopedPatterns: string[]) {
+  return [...baseInjuries, ...scopedPatterns.slice(0, 2)];
 }
 
 function pick<T>(items: T[]): T {
