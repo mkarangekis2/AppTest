@@ -13,6 +13,13 @@ export function enrichConopAnalysis(
 ): ConopAnalysisOutput {
   const laneType = normalizeLaneType(conop.metadata.lane_type);
   const actionSet = getMedicActionSet(laneType);
+  const trainingLevelLabel =
+    typeof conop.metadata.training_level_label === "string" && conop.metadata.training_level_label
+      ? conop.metadata.training_level_label
+      : "Ranger casualty lane";
+  const medicalAssets = Array.isArray(conop.metadata.medical_assets)
+    ? conop.metadata.medical_assets.filter((item): item is string => typeof item === "string")
+    : [];
 
   return {
     ...analysis,
@@ -23,7 +30,7 @@ export function enrichConopAnalysis(
         "Training-only",
         "Instructor-controlled progression"
       ]),
-      resources: ensureArrayItems(analysis.operational_context.resources, actionSet.emphasis),
+      resources: ensureArrayItems(analysis.operational_context.resources, [...actionSet.emphasis, ...medicalAssets]),
       lane_type: actionSet.laneType,
       medic_action_set_name: actionSet.name,
       medic_action_set: actionSet.actions
@@ -56,7 +63,7 @@ export function enrichConopAnalysis(
         wound_set: { injuries },
         patient_presentation: {
           ...candidate.patient_presentation,
-          demeanor: candidate.patient_presentation.demeanor || defaultDemeanor(candidate.difficulty),
+          demeanor: candidate.patient_presentation.demeanor || defaultDemeanor(candidate.difficulty, trainingLevelLabel),
           chief_complaint: chiefComplaint,
           script_opening_line: openingLine,
           answers_to_common_questions: {
@@ -176,9 +183,13 @@ function normalizeProgressionRules(
 function ensureDetailedSetting(setting: string, conop: { title: string; metadata: ConopMetadata }, actionSetName: string) {
   const unit = typeof conop.metadata.unit === "string" && conop.metadata.unit ? conop.metadata.unit : "Ranger element";
   const location = typeof conop.metadata.location === "string" && conop.metadata.location ? conop.metadata.location : "training objective";
+  const trainingLevel =
+    typeof conop.metadata.training_level_label === "string" && conop.metadata.training_level_label
+      ? conop.metadata.training_level_label
+      : "Ranger lane";
   return setting && setting !== "Field training lane"
     ? setting
-    : `${unit} operating at ${location} during a ${actionSetName.toLowerCase()} lane derived from ${conop.title}.`;
+    : `${unit} operating at ${location} during a ${trainingLevel.toLowerCase()} ${actionSetName.toLowerCase()} derived from ${conop.title}.`;
 }
 
 function buildMoi(rawText: string, actionSetName: string) {
@@ -187,10 +198,10 @@ function buildMoi(rawText: string, actionSetName: string) {
     : `Scenario event generated for ${actionSetName.toLowerCase()} conditions.`;
 }
 
-function defaultDemeanor(difficulty: string) {
+function defaultDemeanor(difficulty: string, trainingLevelLabel: string) {
   return difficulty === "advanced"
-    ? "Initially coherent but degrades quickly if the medic misses key interventions."
-    : "Responsive, stressed, and reactive to medic commands.";
+    ? `Initially coherent but degrades quickly if the ${trainingLevelLabel.toLowerCase()} misses key interventions.`
+    : `Responsive, stressed, and reactive to the ${trainingLevelLabel.toLowerCase()} medic's commands.`;
 }
 
 function ensureArrayItems(items: string[], fallbacks: string[]) {

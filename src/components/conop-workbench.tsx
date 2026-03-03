@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ConopAnalysisOutput, LaneType } from "@/lib/domain";
+import { ConopAnalysisOutput, LaneType, TrainingLevel } from "@/lib/domain";
 import { listLaneTypes } from "@/lib/action-sets";
+import { generateRandomConop, listTrainingLevels } from "@/lib/conop-generator";
 
 type SaveConopResponse = {
   conop: {
@@ -17,9 +18,11 @@ type SaveConopResponse = {
 export function ConopWorkbench() {
   const router = useRouter();
   const laneTypes = listLaneTypes();
+  const trainingLevels = listTrainingLevels();
   const [title, setTitle] = useState("");
   const [rawText, setRawText] = useState("");
   const [laneType, setLaneType] = useState(laneTypes[0]?.laneType || "point-of-injury");
+  const [trainingLevel, setTrainingLevel] = useState<TrainingLevel>("ranger-first-responder");
   const [unit, setUnit] = useState("");
   const [location, setLocation] = useState("");
   const [objective, setObjective] = useState("");
@@ -29,6 +32,21 @@ export function ConopWorkbench() {
   const [selected, setSelected] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<"save" | "analyze" | "scenario" | null>(null);
+
+  function randomizeConop() {
+    const generated = generateRandomConop(trainingLevel);
+    setTitle(generated.title);
+    setRawText(generated.rawText);
+    setLaneType(generated.laneType);
+    setUnit(generated.unit);
+    setLocation(generated.location);
+    setObjective(generated.objective);
+    setMetadataText(JSON.stringify(generated.metadata, null, 2));
+    setConop(null);
+    setAnalysis(null);
+    setSelected(0);
+    setError(null);
+  }
 
   async function saveConop() {
     setPending("save");
@@ -120,6 +138,30 @@ export function ConopWorkbench() {
     <div className="stack">
       <section className="card stack">
         <div className="eyebrow">CONOP Ingestion</div>
+        <div className="grid two">
+          <div className="field">
+            <label htmlFor="training-level">Training Level</label>
+            <select
+              id="training-level"
+              value={trainingLevel}
+              onChange={(event) => setTrainingLevel(event.target.value as TrainingLevel)}
+            >
+              {trainingLevels.map((level) => (
+                <option key={level.value} value={level.value}>
+                  {level.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="panel" style={{ padding: 12 }}>
+            <div className="eyebrow">Generated Lane Focus</div>
+            <ul style={{ margin: 0, paddingLeft: 18 }}>
+              {(trainingLevels.find((level) => level.value === trainingLevel)?.focus || []).map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
         <div className="field">
           <label htmlFor="conop-title">Title</label>
           <input id="conop-title" value={title} onChange={(event) => setTitle(event.target.value)} />
@@ -167,6 +209,9 @@ export function ConopWorkbench() {
           <textarea id="conop-metadata" value={metadataText} onChange={(event) => setMetadataText(event.target.value)} />
         </div>
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+          <button className="secondary" type="button" onClick={randomizeConop} disabled={pending !== null}>
+            Randomized CONOP
+          </button>
           <button onClick={saveConop} disabled={pending !== null || !title || !rawText}>
             {pending === "save" ? "Saving..." : conop ? "Saved" : "Save CONOP"}
           </button>
@@ -178,7 +223,12 @@ export function ConopWorkbench() {
           </button>
         </div>
         {error ? <div className="muted">{error}</div> : null}
-        {!conop ? <div className="muted">Save first to persist the CONOP and enable analysis.</div> : null}
+        {!conop ? (
+          <div className="muted">
+            Save first to persist the CONOP and enable analysis. Use Randomized CONOP to seed a realistic Ranger platoon
+            mission with role-specific medical assets and treatment expectations.
+          </div>
+        ) : null}
       </section>
 
       <section className="card stack">

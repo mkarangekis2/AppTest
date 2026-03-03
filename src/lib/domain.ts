@@ -4,6 +4,7 @@ export type TimePressure = "low" | "medium" | "high";
 export type ScoreDimensionName = "sequence" | "speed" | "accuracy" | "reassessment";
 export type ScoreMark = "correct" | "incorrect" | "delayed" | "missed" | "info";
 export type LaneType = "point-of-injury" | "prolonged-field-care" | "evacuation" | "mass-casualty";
+export type TrainingLevel = "ranger-first-responder" | "advanced-ranger-first-responder" | "ranger-medic";
 
 export type Vitals = {
   hr: number;
