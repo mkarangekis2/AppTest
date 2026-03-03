@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { ScenarioActions } from "@/components/scenario-actions";
+import { buildQuestionPrompts, buildTreatmentCards, compactVitalsDelta, summarizeMission } from "@/lib/scenario-format";
 
 export default async function ScenarioPage({ params }: { params: { id: string } }) {
   const { supabase } = await requireUser();
@@ -15,6 +16,45 @@ export default async function ScenarioPage({ params }: { params: { id: string } 
     notFound();
   }
 
+  const mission = summarizeMission(scenario.environment_json, scenario.moi);
+  const treatmentCards = buildTreatmentCards(scenario);
+  const presentation = scenario.presentation_script_json as {
+    demeanor?: string;
+    behavior_cues?: string[];
+    chief_complaint?: string;
+    script_opening_line?: string;
+  };
+  const woundSet = scenario.wound_set_json as {
+    injuries?: Array<{
+      label: string;
+      region: string;
+      type: string;
+      severity: string;
+      visible_findings: string[];
+      hidden_findings: string[];
+      expected_interventions: string[];
+      critical_errors: string[];
+    }>;
+  };
+  const rubric = scenario.rubric_json as {
+    critical_actions?: Array<{ action: string; must_occur_by_sec: number; fail_if_missed: boolean; notes: string }>;
+    scoring_dimensions?: Array<{ name: string; max_points: number; notes: string }>;
+  };
+  const vitalsModel = scenario.vitals_model_json as {
+    stage?: string;
+    baseline?: { hr: number; rr: number; spo2: number; bp_sys: number; bp_dia: number; temp_c: number; pain_0_10: number };
+    progression_rules?: Array<{
+      trigger: string;
+      allowed_transitions: Array<{
+        to_stage: string;
+        delta: { hr: number; rr: number; spo2: number; bp_sys: number; bp_dia: number; pain_0_10: number };
+        time_window_sec: number;
+        notes: string;
+      }>;
+    }>;
+  };
+  const prompts = buildQuestionPrompts(scenario.presentation_script_json);
+
   return (
     <div className="stack">
       <section className="card stack">
@@ -25,33 +65,152 @@ export default async function ScenarioPage({ params }: { params: { id: string } 
             <div className="muted">
               {scenario.status} · {scenario.difficulty}
             </div>
+            <div className="muted">{mission.missionBrief}</div>
           </div>
           <ScenarioActions scenarioId={scenario.id} status={scenario.status} />
         </div>
         <div className="grid two">
           <div className="panel stack">
-            <div className="eyebrow">Mechanism / Context</div>
+            <div className="eyebrow">Mission Set</div>
+            <strong>Scenario situation</strong>
             <div>{scenario.moi}</div>
-            <pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>{JSON.stringify(scenario.environment_json, null, 2)}</pre>
+            <div className="badge">{mission.setting}</div>
+            <div className="muted">Time pressure: {mission.pressure}</div>
+            <strong>Available resources</strong>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {mission.resources.length ? mission.resources.map((resource) => <span key={resource} className="badge">{resource}</span>) : <span className="muted">No resources authored.</span>}
+            </div>
+            <strong>Lane constraints</strong>
+            <ul style={{ margin: 0, paddingLeft: 18 }}>
+              {mission.constraints.length ? mission.constraints.map((constraint) => <li key={constraint}>{constraint}</li>) : <li>No constraints authored.</li>}
+            </ul>
           </div>
           <div className="panel stack">
-            <div className="eyebrow">Presentation</div>
-            <pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>
-              {JSON.stringify(scenario.presentation_script_json, null, 2)}
-            </pre>
+            <div className="eyebrow">Proctor Script</div>
+            <strong>Patient demeanor</strong>
+            <div>{presentation.demeanor || "No demeanor authored."}</div>
+            <strong>Opening line</strong>
+            <div>&ldquo;{presentation.script_opening_line || "No opening line authored."}&rdquo;</div>
+            <strong>Behavior cues</strong>
+            <ul style={{ margin: 0, paddingLeft: 18 }}>
+              {(presentation.behavior_cues || []).map((cue) => <li key={cue}>{cue}</li>)}
+            </ul>
+            <strong>Question prompts</strong>
+            <div className="stack">
+              {prompts.map((prompt) => (
+                <div key={prompt.label} className="panel" style={{ padding: 12 }}>
+                  <div className="eyebrow">{prompt.label}</div>
+                  <div>{prompt.value}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
         <div className="grid two">
           <div className="panel stack">
-            <div className="eyebrow">Wound Set</div>
-            <pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>{JSON.stringify(scenario.wound_set_json, null, 2)}</pre>
+            <div className="eyebrow">Casualty Findings</div>
+            <div className="stack">
+              {(woundSet.injuries || []).map((injury) => (
+                <div key={injury.label} className="panel" style={{ padding: 14 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                    <strong>{injury.label}</strong>
+                    <span className="badge">{injury.severity}</span>
+                  </div>
+                  <div className="muted">{injury.region} · {injury.type}</div>
+                  <strong>Visible findings</strong>
+                  <ul style={{ margin: 0, paddingLeft: 18 }}>
+                    {injury.visible_findings.map((finding) => <li key={finding}>{finding}</li>)}
+                  </ul>
+                  <strong>Hidden findings</strong>
+                  <ul style={{ margin: 0, paddingLeft: 18 }}>
+                    {injury.hidden_findings.map((finding) => <li key={finding}>{finding}</li>)}
+                  </ul>
+                  <strong>Key treatments</strong>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    {injury.expected_interventions.map((item) => <span key={item} className="badge">{item}</span>)}
+                  </div>
+                  <strong>Common critical errors</strong>
+                  <ul style={{ margin: 0, paddingLeft: 18 }}>
+                    {injury.critical_errors.map((item) => <li key={item}>{item}</li>)}
+                  </ul>
+                </div>
+              ))}
+            </div>
           </div>
           <div className="panel stack">
             <div className="eyebrow">Rubric / Vitals</div>
-            <pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>{JSON.stringify(scenario.rubric_json, null, 2)}</pre>
-            <pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>{JSON.stringify(scenario.vitals_model_json, null, 2)}</pre>
+            <strong>Baseline patient state</strong>
+            <div className="badge">{vitalsModel.stage || "unknown"} stage</div>
+            <div className="table">
+              <table>
+                <tbody>
+                  <tr><th>HR</th><td>{vitalsModel.baseline?.hr ?? "-"}</td><th>RR</th><td>{vitalsModel.baseline?.rr ?? "-"}</td></tr>
+                  <tr><th>SpO2</th><td>{vitalsModel.baseline?.spo2 ?? "-"}</td><th>BP</th><td>{vitalsModel.baseline ? `${vitalsModel.baseline.bp_sys}/${vitalsModel.baseline.bp_dia}` : "-"}</td></tr>
+                  <tr><th>Temp C</th><td>{vitalsModel.baseline?.temp_c ?? "-"}</td><th>Pain</th><td>{vitalsModel.baseline?.pain_0_10 ?? "-"}/10</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <strong>Scoring rubric</strong>
+            <div className="stack">
+              {(rubric.critical_actions || []).map((item) => (
+                <div key={item.action} className="panel" style={{ padding: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                    <strong>{item.action}</strong>
+                    <span className="badge">by {item.must_occur_by_sec}s</span>
+                  </div>
+                  <div>{item.notes}</div>
+                  <div className="muted">{item.fail_if_missed ? "Critical fail if missed." : "Scored but not automatic fail."}</div>
+                </div>
+              ))}
+            </div>
+            <strong>Scoring dimensions</strong>
+            <ul style={{ margin: 0, paddingLeft: 18 }}>
+              {(rubric.scoring_dimensions || []).map((dimension) => (
+                <li key={dimension.name}>
+                  {dimension.name} ({dimension.max_points} pts): {dimension.notes}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
+        <section className="panel stack">
+          <div className="eyebrow">Treatment Outcomes</div>
+          <div className="grid two">
+            {treatmentCards.map((card) => (
+              <div key={card.action} className="panel" style={{ padding: 14 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                  <strong>{card.action}</strong>
+                  {card.deadlineSec !== null ? <span className="badge">Due {card.deadlineSec}s</span> : null}
+                </div>
+                <div>{card.reason}</div>
+                {card.visibleCues.length ? (
+                  <>
+                    <strong>What cues justify it</strong>
+                    <ul style={{ margin: 0, paddingLeft: 18 }}>
+                      {card.visibleCues.map((cue) => <li key={cue}>{cue}</li>)}
+                    </ul>
+                  </>
+                ) : null}
+                <strong>If done</strong>
+                <ul style={{ margin: 0, paddingLeft: 18 }}>
+                  {card.ifDone.map((item) => <li key={item}>{item}</li>)}
+                </ul>
+                <strong>If delayed / missed</strong>
+                <ul style={{ margin: 0, paddingLeft: 18 }}>
+                  {card.ifMissed.map((item) => <li key={item}>{item}</li>)}
+                </ul>
+                <strong>Authored state changes</strong>
+                <ul style={{ margin: 0, paddingLeft: 18 }}>
+                  {card.stageEffects.length ? card.stageEffects.map((effect) => (
+                    <li key={`${card.action}-${effect.label}-${effect.toStage}`}>
+                      {effect.label}: {effect.toStage} in {effect.timeWindowSec}s. {effect.notes} {compactVitalsDelta(effect.delta)}
+                    </li>
+                  )) : <li>No authored state change for this treatment.</li>}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
         <Link href="/">Back to dashboard</Link>
       </section>
     </div>
