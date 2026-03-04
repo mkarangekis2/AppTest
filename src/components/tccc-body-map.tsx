@@ -3,66 +3,103 @@ type Injury = {
   region: string;
   severity: string;
   type: string;
+  visible_findings?: string[];
+  hidden_findings?: string[];
 };
+
+type View = "front" | "back";
+type Side = "left" | "right" | "center";
+type Zone =
+  | "head"
+  | "neck"
+  | "shoulder"
+  | "upper_arm"
+  | "forearm"
+  | "hand"
+  | "chest"
+  | "upper_back"
+  | "abdomen"
+  | "lower_back"
+  | "pelvis"
+  | "groin"
+  | "glute"
+  | "thigh"
+  | "knee"
+  | "lower_leg"
+  | "foot";
 
 type Marker = {
   id: string;
   label: string;
   region: string;
   severity: string;
-  view: "front" | "back";
+  view: View;
+  side: Side;
+  zone: Zone;
   x: number;
   y: number;
+  tone: string;
 };
 
-const FRONT: ReadonlyArray<{ part: string; x: number; y: number }> = [
-  { part: "head", x: 50, y: 10 },
-  { part: "neck", x: 50, y: 17 },
-  { part: "chest", x: 50, y: 24 },
-  { part: "abdomen", x: 50, y: 34 },
-  { part: "pelvis", x: 50, y: 45 },
-  { part: "right shoulder", x: 36, y: 22 },
-  { part: "left shoulder", x: 64, y: 22 },
-  { part: "right arm", x: 30, y: 30 },
-  { part: "left arm", x: 70, y: 30 },
-  { part: "right forearm", x: 26, y: 38 },
-  { part: "left forearm", x: 74, y: 38 },
-  { part: "right hand", x: 24, y: 45 },
-  { part: "left hand", x: 76, y: 45 },
-  { part: "right thigh", x: 43, y: 58 },
-  { part: "left thigh", x: 57, y: 58 },
-  { part: "right knee", x: 43, y: 69 },
-  { part: "left knee", x: 57, y: 69 },
-  { part: "right lower leg", x: 43, y: 79 },
-  { part: "left lower leg", x: 57, y: 79 },
-  { part: "right foot", x: 43, y: 90 },
-  { part: "left foot", x: 57, y: 90 }
-];
+const COORDS: Record<View, Record<Zone, Record<Side, { x: number; y: number }>>> = {
+  front: {
+    head: { left: { x: 48, y: 11 }, right: { x: 52, y: 11 }, center: { x: 50, y: 10 } },
+    neck: { left: { x: 49, y: 17 }, right: { x: 51, y: 17 }, center: { x: 50, y: 17 } },
+    shoulder: { left: { x: 62, y: 22 }, right: { x: 38, y: 22 }, center: { x: 50, y: 22 } },
+    upper_arm: { left: { x: 67, y: 30 }, right: { x: 33, y: 30 }, center: { x: 50, y: 30 } },
+    forearm: { left: { x: 73, y: 38 }, right: { x: 27, y: 38 }, center: { x: 50, y: 38 } },
+    hand: { left: { x: 76, y: 45 }, right: { x: 24, y: 45 }, center: { x: 50, y: 45 } },
+    chest: { left: { x: 56, y: 24 }, right: { x: 44, y: 24 }, center: { x: 50, y: 24 } },
+    upper_back: { left: { x: 56, y: 24 }, right: { x: 44, y: 24 }, center: { x: 50, y: 24 } },
+    abdomen: { left: { x: 55, y: 34 }, right: { x: 45, y: 34 }, center: { x: 50, y: 34 } },
+    lower_back: { left: { x: 55, y: 34 }, right: { x: 45, y: 34 }, center: { x: 50, y: 34 } },
+    pelvis: { left: { x: 55, y: 46 }, right: { x: 45, y: 46 }, center: { x: 50, y: 45 } },
+    groin: { left: { x: 55, y: 49 }, right: { x: 45, y: 49 }, center: { x: 50, y: 49 } },
+    glute: { left: { x: 56, y: 50 }, right: { x: 44, y: 50 }, center: { x: 50, y: 50 } },
+    thigh: { left: { x: 57, y: 59 }, right: { x: 43, y: 59 }, center: { x: 50, y: 59 } },
+    knee: { left: { x: 57, y: 70 }, right: { x: 43, y: 70 }, center: { x: 50, y: 70 } },
+    lower_leg: { left: { x: 57, y: 80 }, right: { x: 43, y: 80 }, center: { x: 50, y: 80 } },
+    foot: { left: { x: 57, y: 91 }, right: { x: 43, y: 91 }, center: { x: 50, y: 91 } }
+  },
+  back: {
+    head: { left: { x: 48, y: 11 }, right: { x: 52, y: 11 }, center: { x: 50, y: 10 } },
+    neck: { left: { x: 49, y: 17 }, right: { x: 51, y: 17 }, center: { x: 50, y: 17 } },
+    shoulder: { left: { x: 62, y: 22 }, right: { x: 38, y: 22 }, center: { x: 50, y: 22 } },
+    upper_arm: { left: { x: 67, y: 30 }, right: { x: 33, y: 30 }, center: { x: 50, y: 30 } },
+    forearm: { left: { x: 73, y: 38 }, right: { x: 27, y: 38 }, center: { x: 50, y: 38 } },
+    hand: { left: { x: 76, y: 45 }, right: { x: 24, y: 45 }, center: { x: 50, y: 45 } },
+    chest: { left: { x: 56, y: 24 }, right: { x: 44, y: 24 }, center: { x: 50, y: 24 } },
+    upper_back: { left: { x: 56, y: 24 }, right: { x: 44, y: 24 }, center: { x: 50, y: 24 } },
+    abdomen: { left: { x: 55, y: 34 }, right: { x: 45, y: 34 }, center: { x: 50, y: 34 } },
+    lower_back: { left: { x: 55, y: 34 }, right: { x: 45, y: 34 }, center: { x: 50, y: 34 } },
+    pelvis: { left: { x: 55, y: 46 }, right: { x: 45, y: 46 }, center: { x: 50, y: 45 } },
+    groin: { left: { x: 55, y: 49 }, right: { x: 45, y: 49 }, center: { x: 50, y: 49 } },
+    glute: { left: { x: 56, y: 50 }, right: { x: 44, y: 50 }, center: { x: 50, y: 50 } },
+    thigh: { left: { x: 57, y: 61 }, right: { x: 43, y: 61 }, center: { x: 50, y: 61 } },
+    knee: { left: { x: 57, y: 71 }, right: { x: 43, y: 71 }, center: { x: 50, y: 71 } },
+    lower_leg: { left: { x: 57, y: 81 }, right: { x: 43, y: 81 }, center: { x: 50, y: 81 } },
+    foot: { left: { x: 57, y: 91 }, right: { x: 43, y: 91 }, center: { x: 50, y: 91 } }
+  }
+};
 
-const BACK: ReadonlyArray<{ part: string; x: number; y: number }> = [
-  { part: "head", x: 50, y: 10 },
-  { part: "neck", x: 50, y: 17 },
-  { part: "upper back", x: 50, y: 24 },
-  { part: "lower back", x: 50, y: 34 },
-  { part: "pelvis", x: 50, y: 45 },
-  { part: "right shoulder", x: 36, y: 22 },
-  { part: "left shoulder", x: 64, y: 22 },
-  { part: "right arm", x: 30, y: 30 },
-  { part: "left arm", x: 70, y: 30 },
-  { part: "right forearm", x: 26, y: 38 },
-  { part: "left forearm", x: 74, y: 38 },
-  { part: "right hand", x: 24, y: 45 },
-  { part: "left hand", x: 76, y: 45 },
-  { part: "right glute", x: 44, y: 50 },
-  { part: "left glute", x: 56, y: 50 },
-  { part: "right thigh", x: 43, y: 60 },
-  { part: "left thigh", x: 57, y: 60 },
-  { part: "right knee", x: 43, y: 70 },
-  { part: "left knee", x: 57, y: 70 },
-  { part: "right lower leg", x: 43, y: 80 },
-  { part: "left lower leg", x: 57, y: 80 },
-  { part: "right foot", x: 43, y: 90 },
-  { part: "left foot", x: 57, y: 90 }
+const ZONE_KEYWORDS: Array<{ zone: Zone; keywords: string[] }> = [
+  { zone: "head", keywords: ["head", "scalp", "face", "skull"] },
+  { zone: "neck", keywords: ["neck", "throat", "cervical"] },
+  { zone: "shoulder", keywords: ["shoulder", "clavicle", "deltoid"] },
+  { zone: "upper_arm", keywords: ["upper arm", "bicep", "tricep", "humerus", "arm"] },
+  { zone: "forearm", keywords: ["forearm", "radius", "ulna"] },
+  { zone: "hand", keywords: ["hand", "wrist", "palm", "finger"] },
+  { zone: "chest", keywords: ["chest", "thorax", "rib", "anterior chest", "lateral chest"] },
+  { zone: "upper_back", keywords: ["upper back", "scapular", "posterior chest"] },
+  { zone: "abdomen", keywords: ["abdomen", "abdominal", "stomach", "flank"] },
+  { zone: "lower_back", keywords: ["lower back", "lumbar"] },
+  { zone: "pelvis", keywords: ["pelvis", "hip", "iliac"] },
+  { zone: "groin", keywords: ["groin", "junctional"] },
+  { zone: "glute", keywords: ["glute", "buttock"] },
+  { zone: "thigh", keywords: ["thigh", "femur", "upper leg", "leg"] },
+  { zone: "knee", keywords: ["knee", "patella"] },
+  { zone: "lower_leg", keywords: ["shin", "calf", "tibia", "fibula", "lower leg"] },
+  { zone: "foot", keywords: ["foot", "ankle", "heel", "toe"] }
 ];
 
 export function TcccBodyMap({ injuries }: { injuries: Injury[] }) {
@@ -74,7 +111,12 @@ export function TcccBodyMap({ injuries }: { injuries: Injury[] }) {
     <div className="stack">
       <div className="section-heading">
         <div className="eyebrow">TCCC Human View</div>
-        <h3 style={{ margin: 0 }}>Injury map (marking with X)</h3>
+        <h3 style={{ margin: 0 }}>Injury map with region-matched X markers</h3>
+        <div className="badge-row">
+          <span className="badge">{frontMarkers.length} front</span>
+          <span className="badge">{backMarkers.length} back</span>
+          <span className="badge danger">Severe markers emphasized</span>
+        </div>
       </div>
       <div className="grid two">
         <div className="packet-block">
@@ -88,25 +130,35 @@ export function TcccBodyMap({ injuries }: { injuries: Injury[] }) {
       </div>
       <div className="packet-block">
         <div className="eyebrow">Marked findings</div>
-        <ul className="list-tight">
+        <div className="grid two">
           {markers.length ? (
             markers.map((marker, index) => (
-              <li key={marker.id}>
-                X{index + 1}: {marker.label} ({marker.region}) - {marker.severity}
-              </li>
+              <div key={marker.id} className="command-card" style={{ gap: 8, padding: 12 }}>
+                <div className="badge-row">
+                  <span className="badge" style={{ borderColor: marker.tone, color: marker.tone }}>X{index + 1}</span>
+                  <span className={`badge ${marker.severity === "severe" ? "danger" : marker.severity === "moderate" ? "warning" : ""}`}>
+                    {marker.severity}
+                  </span>
+                  <span className="badge ghost">{marker.view} - {marker.side}</span>
+                </div>
+                <strong>{marker.label}</strong>
+                <div className="muted">
+                  {marker.region} · mapped to {formatZone(marker.zone)}
+                </div>
+              </div>
             ))
           ) : (
-            <li>No injury findings available.</li>
+            <div className="empty-state">No injury findings available.</div>
           )}
-        </ul>
+        </div>
       </div>
     </div>
   );
 }
 
-function BodyFigure({ view, markers }: { view: "front" | "back"; markers: Marker[] }) {
+function BodyFigure({ view, markers }: { view: View; markers: Marker[] }) {
   return (
-    <svg viewBox="0 0 220 360" role="img" aria-label={`${view} TCCC body map`} style={{ width: "100%", maxWidth: 320 }}>
+    <svg viewBox="0 0 220 360" role="img" aria-label={`${view} TCCC body map`} style={{ width: "100%", maxWidth: 340 }}>
       <title>{view} body map</title>
       <rect x="1" y="1" width="218" height="358" rx="12" fill="rgba(255,255,255,0.34)" stroke="rgba(97,86,70,0.24)" />
       <circle cx="110" cy="38" r="20" fill="none" stroke="#7d7260" strokeWidth="2.2" />
@@ -120,12 +172,14 @@ function BodyFigure({ view, markers }: { view: "front" | "back"; markers: Marker
       {markers.map((marker, index) => {
         const x = mapToCanvasX(marker.x);
         const y = mapToCanvasY(marker.y);
+        const radius = marker.severity === "severe" ? 13 : marker.severity === "moderate" ? 11 : 10;
+
         return (
           <g key={marker.id}>
-            <line x1={x - 7} y1={y - 7} x2={x + 7} y2={y + 7} stroke="#9a2f22" strokeWidth="3" />
-            <line x1={x + 7} y1={y - 7} x2={x - 7} y2={y + 7} stroke="#9a2f22" strokeWidth="3" />
-            <circle cx={x} cy={y} r="10" fill="none" stroke="rgba(154,47,34,0.4)" strokeWidth="1" />
-            <text x={x + 11} y={y - 3} fill="#9a2f22" fontSize="12" fontWeight="700">
+            <circle cx={x} cy={y} r={radius} fill="rgba(255,255,255,0.82)" stroke={marker.tone} strokeWidth={1.6} />
+            <line x1={x - 7} y1={y - 7} x2={x + 7} y2={y + 7} stroke={marker.tone} strokeWidth="3" />
+            <line x1={x + 7} y1={y - 7} x2={x - 7} y2={y + 7} stroke={marker.tone} strokeWidth="3" />
+            <text x={x + radius + 4} y={y - 3} fill={marker.tone} fontSize="12" fontWeight="700">
               X{index + 1}
             </text>
           </g>
@@ -139,11 +193,11 @@ function BodyFigure({ view, markers }: { view: "front" | "back"; markers: Marker
 }
 
 function toMarker(injury: Injury, index: number): Marker {
-  const region = injury.region.toLowerCase();
-  const front = pickPoint(region, FRONT);
-  const back = pickPoint(region, BACK);
-  const view = region.includes("back") || region.includes("posterior") || region.includes("glute") ? "back" : "front";
-  const point = view === "front" ? front : back;
+  const text = buildSearchText(injury);
+  const side = detectSide(text);
+  const view = detectView(text);
+  const zone = detectZone(text);
+  const coord = COORDS[view][zone][side];
 
   return {
     id: `${injury.label}-${index}`,
@@ -151,29 +205,72 @@ function toMarker(injury: Injury, index: number): Marker {
     region: injury.region,
     severity: injury.severity,
     view,
-    x: point.x,
-    y: point.y
+    side,
+    zone,
+    x: coord.x,
+    y: coord.y,
+    tone: toneForSeverity(injury.severity)
   };
 }
 
-function pickPoint(region: string, points: ReadonlyArray<{ part: string; x: number; y: number }>) {
-  const keyed = points.find((entry) => region.includes(entry.part));
-  if (keyed) {
-    return keyed;
+function buildSearchText(injury: Injury) {
+  return [
+    injury.label,
+    injury.region,
+    injury.type,
+    ...(injury.visible_findings || []),
+    ...(injury.hidden_findings || [])
+  ]
+    .join(" ")
+    .toLowerCase();
+}
+
+function detectSide(text: string): Side {
+  if (text.includes("bilateral") || text.includes("both")) {
+    return "center";
   }
-  if (region.includes("groin")) {
-    return { part: "pelvis", x: 50, y: 47 };
+  if (hasWord(text, "left") || hasWord(text, "l")) {
+    return "left";
   }
-  if (region.includes("junctional")) {
-    return { part: "pelvis", x: region.includes("right") ? 44 : region.includes("left") ? 56 : 50, y: 48 };
+  if (hasWord(text, "right") || hasWord(text, "r")) {
+    return "right";
   }
-  if (region.includes("torso") || region.includes("trunk")) {
-    return { part: "chest", x: 50, y: 28 };
+  return "center";
+}
+
+function detectView(text: string): View {
+  if (text.includes("posterior") || text.includes("back") || text.includes("dorsal") || text.includes("glute")) {
+    return "back";
   }
-  if (region.includes("extremity") || region.includes("leg")) {
-    return { part: "thigh", x: region.includes("right") ? 43 : region.includes("left") ? 57 : 50, y: 60 };
+  return "front";
+}
+
+function detectZone(text: string): Zone {
+  for (const option of ZONE_KEYWORDS) {
+    if (option.keywords.some((keyword) => text.includes(keyword))) {
+      return option.zone;
+    }
   }
-  return { part: "chest", x: 50, y: 28 };
+  return "chest";
+}
+
+function toneForSeverity(severity: string) {
+  if (severity === "severe") {
+    return "#9a2f22";
+  }
+  if (severity === "moderate") {
+    return "#8a5e19";
+  }
+  return "#6f8a4b";
+}
+
+function hasWord(text: string, word: string) {
+  const normalized = ` ${text.replace(/[^a-z0-9]+/g, " ")} `;
+  return normalized.includes(` ${word} `);
+}
+
+function formatZone(zone: Zone) {
+  return zone.replace("_", " ");
 }
 
 function mapToCanvasX(x: number) {
