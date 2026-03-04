@@ -309,41 +309,7 @@ export function SessionConsole({
             );
           })}
         </div>
-        <div className="action-row">
-          <button className="secondary" disabled={Boolean(endedAt) || pending !== null} onClick={getSuggestion}>
-            {pending === "suggestion" ? "Loading..." : "Get AI Suggestion"}
-          </button>
-          <button className="danger" disabled={Boolean(endedAt) || pending !== null} onClick={endSession}>
-            {pending === "end" ? "Ending..." : "End Session"}
-          </button>
-        </div>
         {error ? <div className="badge danger">{error}</div> : null}
-        <div className="table">
-          <table>
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>Type</th>
-                <th>Payload</th>
-              </tr>
-            </thead>
-            <tbody>
-              {events.length ? (
-                events.map((event) => (
-                  <tr key={event.id}>
-                    <td>{new Date(event.ts).toLocaleTimeString()}</td>
-                    <td>{event.type}</td>
-                    <td>{JSON.stringify(event.payload_json)}</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={3}>No events yet.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
       </section>
 
       <section className="card stack">
@@ -450,6 +416,18 @@ export function SessionConsole({
         </div>
 
         <div className="command-card">
+          <strong>Session controls</strong>
+          <div className="action-row">
+            <button className="secondary" disabled={Boolean(endedAt) || pending !== null} onClick={getSuggestion}>
+              {pending === "suggestion" ? "Loading..." : "Get AI Suggestion"}
+            </button>
+            <button className="danger" disabled={Boolean(endedAt) || pending !== null} onClick={endSession}>
+              {pending === "end" ? "Ending..." : "End Session"}
+            </button>
+          </div>
+        </div>
+
+        <div className="command-card">
           <strong>AI suggestion</strong>
           {!suggestion ? (
             <div className="empty-state">No active suggestion. Use Get AI Suggestion after logging medic actions.</div>
@@ -519,6 +497,36 @@ export function SessionConsole({
                     <td>{scoreMarks.get(action) || "Unmarked"}</td>
                   </tr>
                 ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="command-card">
+          <strong>Event log</strong>
+          <div className="table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Type</th>
+                  <th>Payload</th>
+                </tr>
+              </thead>
+              <tbody>
+                {events.length ? (
+                  events.map((event) => (
+                    <tr key={event.id}>
+                      <td>{new Date(event.ts).toLocaleTimeString()}</td>
+                      <td>{event.type}</td>
+                      <td>{JSON.stringify(event.payload_json)}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={3}>No events yet.</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
