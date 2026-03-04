@@ -195,6 +195,12 @@ p {
   display: grid;
   gap: 20px;
   grid-template-columns: minmax(0, 1.1fr) minmax(340px, 0.9fr);
+  align-items: start;
+}
+
+.split > * {
+  min-width: 0;
+  align-self: start;
 }
 
 .shell-grid {
