@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { ScenarioActions } from "@/components/scenario-actions";
+import { TcccBodyMap } from "@/components/tccc-body-map";
 import { buildQuestionPrompts, buildTreatmentCards, compactVitalsDelta, summarizeMission } from "@/lib/scenario-format";
 
 export default async function ScenarioPage({ params }: { params: { id: string } }) {
@@ -130,6 +131,7 @@ export default async function ScenarioPage({ params }: { params: { id: string } 
             <div className="eyebrow">Casualty findings</div>
             <h2 style={{ margin: 0 }}>What the proctor should present and watch for</h2>
           </div>
+          <TcccBodyMap injuries={woundSet.injuries || []} />
           <div className="stack">
             {(woundSet.injuries || []).map((injury) => (
               <div key={injury.label} className="command-card active">
