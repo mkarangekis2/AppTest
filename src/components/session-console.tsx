@@ -309,23 +309,9 @@ export function SessionConsole({
             );
           })}
         </div>
-        <div className="field">
-          <label htmlFor="note">Add note</label>
-          <textarea id="note" value={note} onChange={(event) => setNote(event.target.value)} />
-        </div>
         <div className="action-row">
           <button className="secondary" disabled={Boolean(endedAt) || pending !== null} onClick={getSuggestion}>
             {pending === "suggestion" ? "Loading..." : "Get AI Suggestion"}
-          </button>
-          <button
-            className="secondary"
-            disabled={Boolean(endedAt) || pending !== null || !note.trim()}
-            onClick={async () => {
-              await logEvent("note", { note });
-              setNote("");
-            }}
-          >
-            Add Note
           </button>
           <button className="danger" disabled={Boolean(endedAt) || pending !== null} onClick={endSession}>
             {pending === "end" ? "Ending..." : "End Session"}
@@ -441,6 +427,26 @@ export function SessionConsole({
               </li>
             )) : <li>No applied patient changes yet.</li>}
           </ul>
+        </div>
+
+        <div className="command-card">
+          <strong>Lane notes</strong>
+          <div className="field">
+            <label htmlFor="note">Add note</label>
+            <textarea id="note" value={note} onChange={(event) => setNote(event.target.value)} />
+          </div>
+          <div className="action-row">
+            <button
+              className="secondary"
+              disabled={Boolean(endedAt) || pending !== null || !note.trim()}
+              onClick={async () => {
+                await logEvent("note", { note });
+                setNote("");
+              }}
+            >
+              Add Note
+            </button>
+          </div>
         </div>
 
         <div className="command-card">
