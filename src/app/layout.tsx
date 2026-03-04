@@ -16,15 +16,27 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en">
       <body>
         <div className="shell">
-          <header className="header">
-            <div className="stack">
-              <div className="eyebrow">Ranger Medic Evaluator</div>
-              <div>AI-assisted, proctor-controlled training scenarios</div>
+          <header className="topbar">
+            <div className="brand-block">
+              <div className="brand-kicker">
+                <span className="brand-mark">RM</span>
+                <div className="eyebrow">Ranger Medic Evaluator</div>
+                <span className="badge info">Training-only scenario control</span>
+              </div>
+              <div className="brand-title">Proctor-led casualty lanes from CONOP through AAR</div>
+              <div className="brand-copy">
+                Build mission-aligned scenarios, keep AI guidance under instructor control, and run standardized live
+                evaluations without losing realism.
+              </div>
             </div>
-            <div className="stack" style={{ justifyItems: "end" }}>
-              <nav style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                <Link href="/">Dashboard</Link>
-                <Link href="/conops/new">New CONOP</Link>
+            <div className="stack tight" style={{ justifyItems: "end" }}>
+              <nav className="topnav">
+                <Link className="nav-link" href="/">
+                  Dashboard
+                </Link>
+                <Link className="nav-link" href="/conops/new">
+                  New CONOP
+                </Link>
               </nav>
               {user ? <SignOutButton /> : <Link href="/login">Sign in</Link>}
             </div>

@@ -48,7 +48,13 @@ export function ScenarioActions({ scenarioId, status }: { scenarioId: string; st
   }
 
   return (
-    <div className="stack" style={{ justifyItems: "end" }}>
+    <div className="status-panel" style={{ maxWidth: 320 }}>
+      <div className="eyebrow">Scenario control</div>
+      <div className="muted">
+        {status !== "approved"
+          ? "Review the packet, then lock it for live use."
+          : "Scenario package is approved and ready to launch into an evaluation lane."}
+      </div>
       {status !== "approved" ? (
         <button onClick={approve} disabled={pending !== null}>
           {pending === "approve" ? "Approving..." : "Approve Scenario"}
@@ -58,7 +64,7 @@ export function ScenarioActions({ scenarioId, status }: { scenarioId: string; st
           {pending === "start" ? "Starting..." : "Start Session"}
         </button>
       )}
-      {status === "approved" ? <div className="muted">Approval locks the saved scenario package for live use.</div> : null}
+      {status === "approved" ? <div className="badge">Approval locks the saved scenario package for live use.</div> : null}
       {error ? <div className="muted">{error}</div> : null}
     </div>
   );

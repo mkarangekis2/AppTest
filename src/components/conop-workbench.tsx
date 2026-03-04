@@ -148,80 +148,22 @@ export function ConopWorkbench() {
   }
 
   return (
-    <div className="stack">
-      <section className="card stack">
-        <div className="eyebrow">CONOP Ingestion</div>
-        <div className="grid two">
-          <div className="field">
-            <label htmlFor="training-level">Training Level</label>
-            <select
-              id="training-level"
-              value={trainingLevel}
-              onChange={(event) => setTrainingLevel(event.target.value as TrainingLevel)}
-            >
-              {trainingLevels.map((level) => (
-                <option key={level.value} value={level.value}>
-                  {level.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="panel" style={{ padding: 12 }}>
-            <div className="eyebrow">Generated Lane Focus</div>
-            <ul style={{ margin: 0, paddingLeft: 18 }}>
-              {(trainingLevels.find((level) => level.value === trainingLevel)?.focus || []).map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </div>
+    <div className="shell-grid">
+      <section className="hero card mission-hero">
+        <div className="badge-row">
+          <span className="badge info">Planning surface</span>
+          <span className="badge">{trainingLevels.find((level) => level.value === trainingLevel)?.label}</span>
+          <span className="badge ghost">{laneTypes.find((lane) => lane.laneType === laneType)?.name}</span>
         </div>
-        <div className="field">
-          <label htmlFor="conop-title">Title</label>
-          <input id="conop-title" value={title} onChange={(event) => setTitle(event.target.value)} />
+        <div className="section-heading">
+          <div className="eyebrow">CONOP Ingestion</div>
+          <h1 className="display-title" style={{ margin: 0 }}>Build the mission brief that drives the casualty lane</h1>
         </div>
-        <div className="field">
-          <label htmlFor="conop-text">Raw CONOP</label>
-          <textarea id="conop-text" value={rawText} onChange={(event) => setRawText(event.target.value)} />
-        </div>
-        <div className="grid two">
-          <div className="field">
-            <label htmlFor="lane-type">Lane Type</label>
-            <select id="lane-type" value={laneType} onChange={(event) => setLaneType(event.target.value as LaneType)}>
-              {laneTypes.map((lane) => (
-                <option key={lane.laneType} value={lane.laneType}>
-                  {lane.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="panel" style={{ padding: 12 }}>
-            <div className="eyebrow">Action Set Emphasis</div>
-            <ul style={{ margin: 0, paddingLeft: 18 }}>
-              {(laneTypes.find((lane) => lane.laneType === laneType)?.emphasis || []).map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-        <div className="grid two">
-          <div className="field">
-            <label htmlFor="conop-unit">Unit</label>
-            <input id="conop-unit" value={unit} onChange={(event) => setUnit(event.target.value)} />
-          </div>
-          <div className="field">
-            <label htmlFor="conop-location">Location</label>
-            <input id="conop-location" value={location} onChange={(event) => setLocation(event.target.value)} />
-          </div>
-        </div>
-        <div className="field">
-          <label htmlFor="conop-objective">Training Objective</label>
-          <input id="conop-objective" value={objective} onChange={(event) => setObjective(event.target.value)} />
-        </div>
-        <div className="field">
-          <label htmlFor="conop-metadata">Additional Metadata JSON</label>
-          <textarea id="conop-metadata" value={metadataText} onChange={(event) => setMetadataText(event.target.value)} />
-        </div>
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+        <p className="lede">
+          Capture operational context, define authority level, and generate a realistic training lane before asking the
+          AI to analyze the mission.
+        </p>
+        <div className="hero-actions">
           <button className="secondary" type="button" onClick={randomizeConop} disabled={pending !== null}>
             Randomized CONOP
           </button>
@@ -235,30 +177,165 @@ export function ConopWorkbench() {
             {pending === "scenario" ? "Saving draft..." : "Save Scenario Draft"}
           </button>
         </div>
-        {error ? <div className="muted">{error}</div> : null}
-        {!conop ? (
-          <div className="muted">
-            Save first to persist the CONOP and enable analysis. Use Randomized CONOP to seed a realistic Ranger platoon
-            mission with role-specific medical assets and treatment expectations.
+      </section>
+
+      <section className="packet-grid two">
+        <div className="card stack">
+          <div className="section-heading">
+            <div className="eyebrow">Lane Configuration</div>
+            <h2 style={{ margin: 0 }}>Operational setup</h2>
           </div>
-        ) : null}
+          <div className="grid two">
+            <div className="field">
+              <label htmlFor="training-level">Training Level</label>
+              <select
+                id="training-level"
+                value={trainingLevel}
+                onChange={(event) => setTrainingLevel(event.target.value as TrainingLevel)}
+              >
+                {trainingLevels.map((level) => (
+                  <option key={level.value} value={level.value}>
+                    {level.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label htmlFor="lane-type">Lane Type</label>
+              <select id="lane-type" value={laneType} onChange={(event) => setLaneType(event.target.value as LaneType)}>
+                {laneTypes.map((lane) => (
+                  <option key={lane.laneType} value={lane.laneType}>
+                    {lane.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="packet-block emphasis">
+            <div className="eyebrow">Generated lane focus</div>
+            <ul className="list-tight">
+              {(trainingLevels.find((level) => level.value === trainingLevel)?.focus || []).map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+          <div className="packet-block">
+            <div className="eyebrow">Action set emphasis</div>
+            <ul className="list-tight">
+              {(laneTypes.find((lane) => lane.laneType === laneType)?.emphasis || []).map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+          <div className="grid two">
+            <div className="field">
+              <label htmlFor="conop-unit">Unit</label>
+              <input id="conop-unit" value={unit} onChange={(event) => setUnit(event.target.value)} />
+            </div>
+            <div className="field">
+              <label htmlFor="conop-location">Location</label>
+              <input id="conop-location" value={location} onChange={(event) => setLocation(event.target.value)} />
+            </div>
+          </div>
+          <div className="field">
+            <label htmlFor="conop-objective">Training Objective</label>
+            <input id="conop-objective" value={objective} onChange={(event) => setObjective(event.target.value)} />
+          </div>
+        </div>
+
+        <div className="card stack">
+          <div className="section-heading">
+            <div className="eyebrow">Readiness</div>
+            <h2 style={{ margin: 0 }}>Analysis status and missing steps</h2>
+          </div>
+          <div className={`status-panel ${conop ? "stable" : "worsening"}`}>
+            <div className="badge-row">
+              <span className={`badge ${conop ? "" : "warning"}`}>{conop ? "CONOP saved" : "Draft only"}</span>
+              <span className={`badge ${analysis ? "" : "ghost"}`}>{analysis ? "Analysis ready" : "No AI analysis yet"}</span>
+            </div>
+            <div className="muted">
+              {conop
+                ? "Saved mission details are ready for scenario analysis."
+                : "Save first to persist the CONOP and unlock AI analysis."}
+            </div>
+            {!conop ? (
+              <div className="empty-state">
+                Use Randomized CONOP to seed a realistic Ranger platoon mission with role-specific assets and treatment
+                expectations, or author your own mission brief manually.
+              </div>
+            ) : null}
+            {error ? <div className="badge danger">{error}</div> : null}
+          </div>
+          <div className="metric-grid">
+            <div className="metric-card">
+              <div className="metric-label">Training level</div>
+              <div className="metric-value" style={{ fontSize: "1.05rem" }}>
+                {trainingLevels.find((level) => level.value === trainingLevel)?.label}
+              </div>
+            </div>
+            <div className="metric-card">
+              <div className="metric-label">Lane type</div>
+              <div className="metric-value" style={{ fontSize: "1.05rem" }}>
+                {laneTypes.find((lane) => lane.laneType === laneType)?.name}
+              </div>
+            </div>
+            <div className="metric-card">
+              <div className="metric-label">Scenario candidates</div>
+              <div className="metric-value">{analysis?.scenario_candidates.length || 0}</div>
+            </div>
+          </div>
+          <div className="packet-block">
+            <div className="eyebrow">What the AI will use</div>
+            <ul className="list-tight">
+              <li>Mission narrative and objective</li>
+              <li>Training level authority and scope metadata</li>
+              <li>Lane type, assets, and environmental details</li>
+              <li>Additional metadata JSON for realism and constraints</li>
+            </ul>
+          </div>
+        </div>
       </section>
 
       <section className="card stack">
-        <div className="eyebrow">Scenario Candidates</div>
+        <div className="section-heading">
+          <div className="eyebrow">Mission brief</div>
+          <h2 style={{ margin: 0 }}>Draft the CONOP and supporting metadata</h2>
+        </div>
+        <div className="field">
+          <label htmlFor="conop-title">Title</label>
+          <input id="conop-title" value={title} onChange={(event) => setTitle(event.target.value)} />
+        </div>
+        <div className="field">
+          <label htmlFor="conop-text">Raw CONOP</label>
+          <textarea id="conop-text" value={rawText} onChange={(event) => setRawText(event.target.value)} />
+        </div>
+        <div className="field">
+          <label htmlFor="conop-metadata">Additional Metadata JSON</label>
+          <textarea id="conop-metadata" value={metadataText} onChange={(event) => setMetadataText(event.target.value)} />
+        </div>
+      </section>
+
+      <section className="card stack">
+        <div className="section-heading">
+          <div className="eyebrow">Scenario candidates</div>
+          <h2 style={{ margin: 0 }}>Select the packet you want to save as a draft</h2>
+        </div>
         {!analysis ? (
-          <div className="muted">No analysis yet. Use Analyze CONOP to generate scenario candidates.</div>
+          <div className="empty-state">No analysis yet. Use Analyze CONOP to generate candidate scenario packets.</div>
         ) : (
           <>
-            <div className="muted">{analysis.conop_summary}</div>
+            <div className="status-panel stable">
+              <div className="eyebrow">AI summary</div>
+              <div>{analysis.conop_summary}</div>
+            </div>
             <div className="stack">
               {analysis.scenario_candidates.map((candidate, index) => (
                 <label
                   key={`${candidate.scenario_name}-${index}`}
-                  className="panel"
-                  style={{ display: "grid", gap: 10, cursor: "pointer" }}
+                  className="command-card"
+                  style={{ cursor: "pointer" }}
                 >
-                  <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                  <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
                     <input
                       type="radio"
                       checked={selected === index}
@@ -267,13 +344,19 @@ export function ConopWorkbench() {
                     />
                     <strong>{candidate.scenario_name}</strong>
                     <span className="badge">{candidate.difficulty}</span>
+                    <span className="badge ghost">{candidate.vitals_model.stage}</span>
                   </div>
                   <div className="muted">{candidate.moi}</div>
-                  <div className="muted">
-                    {(analysis.operational_context.medic_action_set_name || "Action set")} ·{" "}
-                    {(analysis.operational_context.medic_action_set || []).join(", ")}
+                  <div className="badge-row">
+                    <span className="badge info">{analysis.operational_context.medic_action_set_name || "Action set"}</span>
+                    {(analysis.operational_context.medic_action_set || []).slice(0, 3).map((action) => (
+                      <span key={action} className="badge ghost">{action}</span>
+                    ))}
                   </div>
-                  <div>{candidate.patient_presentation.script_opening_line}</div>
+                  <div className="packet-block">
+                    <div className="eyebrow">Opening cue</div>
+                    <div>{candidate.patient_presentation.script_opening_line}</div>
+                  </div>
                   <div className="muted">{candidate.training_only_disclaimer}</div>
                 </label>
               ))}

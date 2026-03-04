@@ -39,6 +39,10 @@ export function LoginForm() {
 
   return (
     <form className="card stack" onSubmit={handleSubmit}>
+      <div className="section-heading">
+        <div className="eyebrow">Authentication</div>
+        <h2 style={{ margin: 0 }}>Enter proctor credentials</h2>
+      </div>
       <div className="field">
         <label htmlFor="mode">Mode</label>
         <select id="mode" value={mode} onChange={(event) => setMode(event.target.value as "login" | "signup")}>
@@ -60,6 +64,12 @@ export function LoginForm() {
           minLength={8}
           required
         />
+      </div>
+      <div className="packet-block">
+        <div className="eyebrow">Training control notice</div>
+        <div className="muted">
+          Sign in provides access to CONOP planning, scenario approval, live session control, and after-action review.
+        </div>
       </div>
       {error ? <div className="muted">{error}</div> : null}
       <button type="submit" disabled={pending}>

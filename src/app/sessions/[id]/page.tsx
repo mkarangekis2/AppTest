@@ -16,13 +16,20 @@ export default async function SessionPage({ params }: { params: { id: string } }
   }
 
   return (
-    <div className="stack">
-      <section className="card stack">
+    <div className="shell-grid">
+      <section className="hero card mission-hero">
+        <div className="badge-row">
+          <span className="badge info">Live session</span>
+          <span className="badge">{session.mode}</span>
+          <span className={`badge ${session.current_stage === "critical" ? "danger" : session.current_stage === "worsening" ? "warning" : ""}`}>
+            stage {session.current_stage}
+          </span>
+        </div>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
           <div className="stack">
-            <div className="eyebrow">Live Session</div>
-            <h1 style={{ margin: 0 }}>{session.scenarios?.name || "Scenario"}</h1>
-            <div className="muted">
+            <div className="eyebrow">Exercise control</div>
+            <h1 className="display-title" style={{ margin: 0 }}>{session.scenarios?.name || "Scenario"}</h1>
+            <div className="lede">
               {session.mode} · stage {session.current_stage}
             </div>
           </div>

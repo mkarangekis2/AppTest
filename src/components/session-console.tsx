@@ -23,7 +23,6 @@ type EventRow = {
 };
 
 type ActionStatus = "correct" | "delayed" | "missed" | null;
-
 type VitalsDelta = LiveSuggestionOutput["suggested_state_transition"]["vitals_delta"];
 
 const STAGE_STYLES: Record<string, { border: string; background: string }> = {
@@ -65,9 +64,7 @@ export function SessionConsole({
   const [displayVitals, setDisplayVitals] = useState(currentVitals as Vitals);
   const [appliedSuggestion, setAppliedSuggestion] = useState<LiveSuggestionOutput | null>(null);
 
-  const treatmentCards = useMemo(() => {
-    return buildTreatmentCards(scenario as ScenarioRecord);
-  }, [scenario]);
+  const treatmentCards = useMemo(() => buildTreatmentCards(scenario as ScenarioRecord), [scenario]);
 
   useEffect(() => {
     setDisplayStage(currentStage);
@@ -227,8 +224,11 @@ export function SessionConsole({
   return (
     <div className="split">
       <section className="card stack">
-        <div className="eyebrow">Treatment Checklist</div>
-        <div className="stack">
+        <div className="section-heading">
+          <div className="eyebrow">Treatment control</div>
+          <h2 style={{ margin: 0 }}>Grade the lane one decisive action at a time</h2>
+        </div>
+        <div className="command-grid">
           {(treatmentCards.length ? treatmentCards : configuredActionSet.map((action) => ({
             action,
             deadlineSec: null,
@@ -242,13 +242,13 @@ export function SessionConsole({
             const scoreMark = scoreMarks.get(card.action) as ActionStatus;
 
             return (
-              <div key={card.action} className="panel" style={{ padding: 14 }}>
+              <div key={card.action} className={`command-card ${scoreMark ? "active" : ""}`}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
                   <strong>{card.action}</strong>
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <div className="badge-row">
                     {card.deadlineSec !== null ? <span className="badge">Due {card.deadlineSec}s</span> : null}
-                    {card.failIfMissed ? <span className="badge">Critical</span> : null}
-                    {scoreMark ? <span className="badge">{scoreMark}</span> : null}
+                    {card.failIfMissed ? <span className="badge danger">Critical</span> : null}
+                    {scoreMark ? <span className={`badge ${scoreMark === "missed" ? "danger" : scoreMark === "delayed" ? "warning" : ""}`}>{scoreMark}</span> : null}
                   </div>
                 </div>
                 <div>{card.reason}</div>
@@ -256,36 +256,36 @@ export function SessionConsole({
                   <div className="muted">Look for: {card.visibleCues.join("; ")}</div>
                 ) : null}
                 <div className="grid two">
-                  <div className="panel" style={{ padding: 12 }}>
+                  <div className="packet-block">
                     <div className="eyebrow">If completed</div>
-                    <ul style={{ margin: 0, paddingLeft: 18 }}>
+                    <ul className="list-tight">
                       {card.ifDone.length ? card.ifDone.map((item) => <li key={item}>{item}</li>) : <li>No authored improvement.</li>}
                     </ul>
                   </div>
-                  <div className="panel" style={{ padding: 12 }}>
+                  <div className="packet-block">
                     <div className="eyebrow">If missed</div>
-                    <ul style={{ margin: 0, paddingLeft: 18 }}>
+                    <ul className="list-tight">
                       {card.ifMissed.length ? card.ifMissed.map((item) => <li key={item}>{item}</li>) : <li>No authored deterioration.</li>}
                     </ul>
                   </div>
                 </div>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <div className="command-actions">
                   <button
-                    className={scoreMark === "correct" ? "" : "secondary"}
+                    className={`score-button ${scoreMark === "correct" ? "correct-active" : "secondary"}`}
                     disabled={Boolean(endedAt) || pending !== null}
                     onClick={() => markScore(card.action, "correct")}
                   >
                     Correct
                   </button>
                   <button
-                    className={scoreMark === "delayed" ? "" : "secondary"}
+                    className={`score-button ${scoreMark === "delayed" ? "delayed-active" : "secondary"}`}
                     disabled={Boolean(endedAt) || pending !== null}
                     onClick={() => markScore(card.action, "delayed")}
                   >
                     Delayed
                   </button>
                   <button
-                    className={scoreMark === "missed" ? "danger" : "secondary"}
+                    className={`score-button ${scoreMark === "missed" ? "missed-active" : "secondary"}`}
                     disabled={Boolean(endedAt) || pending !== null}
                     onClick={() => markScore(card.action, "missed")}
                   >
@@ -299,7 +299,7 @@ export function SessionConsole({
                     Undo
                   </button>
                 </div>
-                <div className="muted">
+                <div className={`selection-state ${scoreMark || ""}`}>
                   {scoreMark === "correct" ? "Recorded as completed on time." : null}
                   {scoreMark === "delayed" ? "Recorded as completed, but delayed." : null}
                   {scoreMark === "missed" ? "Recorded as missed / not completed." : null}
@@ -313,7 +313,7 @@ export function SessionConsole({
           <label htmlFor="note">Add note</label>
           <textarea id="note" value={note} onChange={(event) => setNote(event.target.value)} />
         </div>
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+        <div className="action-row">
           <button className="secondary" disabled={Boolean(endedAt) || pending !== null} onClick={getSuggestion}>
             {pending === "suggestion" ? "Loading..." : "Get AI Suggestion"}
           </button>
@@ -331,7 +331,7 @@ export function SessionConsole({
             {pending === "end" ? "Ending..." : "End Session"}
           </button>
         </div>
-        {error ? <div className="muted">{error}</div> : null}
+        {error ? <div className="badge danger">{error}</div> : null}
         <div className="table">
           <table>
             <thead>
@@ -361,10 +361,13 @@ export function SessionConsole({
       </section>
 
       <section className="card stack">
-        <div className="eyebrow">Patient State / Guidance</div>
-        <div className="panel stack">
+        <div className="section-heading">
+          <div className="eyebrow">Patient state / guidance</div>
+          <h2 style={{ margin: 0 }}>Track what is suggested, what is applied, and what changes now</h2>
+        </div>
+        <div className={`status-panel ${displayStage}`}>
           {appliedSuggestion ? (
-            <div className="panel stack" style={{ padding: 14, borderColor: appliedStageStyle.border, background: appliedStageStyle.background }}>
+            <div className="command-card active" style={{ borderColor: appliedStageStyle.border, background: appliedStageStyle.background }}>
               <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
                 <strong>Applied patient update</strong>
                 <span className="badge">{appliedSuggestion.suggested_state_transition.to_stage}</span>
@@ -372,20 +375,20 @@ export function SessionConsole({
               <div>{appliedSuggestion.suggested_state_transition.reason}</div>
               <div className="muted">{compactVitalsDelta(appliedSuggestion.suggested_state_transition.vitals_delta)}</div>
               <div className="grid two">
-                <div className="panel" style={{ padding: 12 }}>
+                <div className="packet-block">
                   <div className="eyebrow">Patient now does</div>
-                  <ul style={{ margin: 0, paddingLeft: 18 }}>
+                  <ul className="list-tight">
                     {appliedSuggestion.suggested_patient_response.what_patient_does.map((item) => <li key={item}>{item}</li>)}
                   </ul>
                 </div>
-                <div className="panel" style={{ padding: 12 }}>
+                <div className="packet-block">
                   <div className="eyebrow">Proctor says</div>
-                  <ul style={{ margin: 0, paddingLeft: 18 }}>
+                  <ul className="list-tight">
                     {appliedSuggestion.suggested_patient_response.proctor_verbatim_lines.map((line) => <li key={line}>{line}</li>)}
                   </ul>
                 </div>
               </div>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <div className="badge-row">
                 {VITAL_LABELS.map((item) => (
                   <VitalsTrendChip key={item.key} label={item.label} value={appliedSuggestion.suggested_state_transition.vitals_delta[item.key]} improveOnDecrease={item.improveOnDecrease} />
                 ))}
@@ -393,7 +396,9 @@ export function SessionConsole({
             </div>
           ) : null}
           <strong>Current stage</strong>
-          <span className="badge">{displayStage}</span>
+          <div className="badge-row">
+            <span className={`badge ${displayStage === "critical" ? "danger" : displayStage === "worsening" ? "warning" : ""}`}>{displayStage}</span>
+          </div>
           <div className="table">
             <table>
               <tbody>
@@ -422,14 +427,14 @@ export function SessionConsole({
               </tbody>
             </table>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 8 }}>
+          <div className="info-grid">
             <VitalsSnapshot label="HR" value={displayVitals.hr} delta={appliedDelta?.hr} improveOnDecrease />
             <VitalsSnapshot label="RR" value={displayVitals.rr} delta={appliedDelta?.rr} improveOnDecrease />
             <VitalsSnapshot label="SpO2" value={displayVitals.spo2} delta={appliedDelta?.spo2} />
             <VitalsSnapshot label="Pain" value={displayVitals.pain_0_10} delta={appliedDelta?.pain_0_10} improveOnDecrease suffix="/10" />
           </div>
           <strong>Recent patient changes</strong>
-          <ul style={{ margin: 0, paddingLeft: 18 }}>
+          <ul className="list-tight">
             {latestChanges.length ? latestChanges.map((event) => (
               <li key={event.id}>
                 {new Date(event.ts).toLocaleTimeString()}: {String(event.payload_json.reason || "Patient state updated.")}
@@ -438,26 +443,26 @@ export function SessionConsole({
           </ul>
         </div>
 
-        <div className="panel stack">
+        <div className="command-card">
           <strong>AI suggestion</strong>
           {!suggestion ? (
-            <div className="muted">No active suggestion. Use Get AI Suggestion after logging medic actions.</div>
+            <div className="empty-state">No active suggestion. Use Get AI Suggestion after logging medic actions.</div>
           ) : (
             <>
               <div className="muted">{suggestion.recognized_medic_action}</div>
-              <div className="panel" style={{ padding: 12 }}>
+              <div className="packet-block">
                 <div className="eyebrow">Proctor delivery</div>
-                <ul style={{ margin: 0, paddingLeft: 18 }}>
+                <ul className="list-tight">
                   {suggestion.suggested_patient_response.proctor_verbatim_lines.map((line) => <li key={line}>{line}</li>)}
                 </ul>
               </div>
-              <div className="panel" style={{ padding: 12 }}>
+              <div className="packet-block">
                 <div className="eyebrow">Patient behavior</div>
-                <ul style={{ margin: 0, paddingLeft: 18 }}>
+                <ul className="list-tight">
                   {suggestion.suggested_patient_response.what_patient_does.map((item) => <li key={item}>{item}</li>)}
                 </ul>
               </div>
-              <div className="panel" style={{ padding: 12 }}>
+              <div className="packet-block">
                 <div className="eyebrow">Suggested state change</div>
                 <div>
                   Move to <strong>{suggestion.suggested_state_transition.to_stage}</strong> over{" "}
@@ -466,14 +471,14 @@ export function SessionConsole({
                 <div>{suggestion.suggested_state_transition.reason}</div>
                 <div className="muted">{compactVitalsDelta(suggestion.suggested_state_transition.vitals_delta)}</div>
               </div>
-              <div className="panel" style={{ padding: 12 }}>
+              <div className="packet-block">
                 <div className="eyebrow">Scoring note</div>
                 <div>
                   {suggestion.scoring_suggestion.rubric_action}: {suggestion.scoring_suggestion.mark}
                 </div>
                 <div className="muted">{suggestion.scoring_suggestion.notes}</div>
               </div>
-              <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+              <div className="action-row">
                 <button disabled={Boolean(endedAt) || pending !== null} onClick={applySuggestion}>
                   {pending === "apply" ? "Applying..." : "Apply Suggested Transition"}
                 </button>
@@ -489,7 +494,7 @@ export function SessionConsole({
           )}
         </div>
 
-        <div className="panel stack">
+        <div className="command-card">
           <strong>Proctor score state</strong>
           <div className="table">
             <table>
@@ -533,7 +538,7 @@ function VitalsSnapshot({
   const tone = getDeltaTone(delta, improveOnDecrease);
 
   return (
-    <div className="panel" style={{ padding: 10 }}>
+    <div className="metric-card">
       <div className="eyebrow">{label}</div>
       <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
         <strong style={{ fontSize: "1.15rem" }}>{value}{suffix}</strong>
