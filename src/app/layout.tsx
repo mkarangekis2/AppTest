@@ -5,8 +5,8 @@ import { getOptionalUser } from "@/lib/auth";
 import { SignOutButton } from "@/components/sign-out-button";
 
 export const metadata: Metadata = {
-  title: "Ranger Medic Evaluator",
-  description: "Training scenario workflow for proctor-led Ranger medic evaluation."
+  title: "Injury Point",
+  description: "An Augmentation Consulting Group Inc. training and evaluation platform for proctor-led casualty lanes."
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -19,14 +19,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <header className="topbar">
             <div className="brand-block">
               <div className="brand-kicker">
-                <span className="brand-mark">RM</span>
-                <div className="eyebrow">Ranger Medic Evaluator</div>
+                <span className="brand-mark">IP</span>
+                <div className="eyebrow">Injury Point</div>
                 <span className="badge info">Training-only scenario control</span>
               </div>
               <div className="brand-title">Proctor-led casualty lanes from CONOP through AAR</div>
               <div className="brand-copy">
-                Build mission-aligned scenarios, keep AI guidance under instructor control, and run standardized live
-                evaluations without losing realism.
+                An Augmentation Consulting Group Inc. product for mission-aligned scenario generation, proctor-controlled
+                lane execution, and standardized after-action evaluation.
               </div>
             </div>
             <div className="stack tight" style={{ justifyItems: "end" }}>
