@@ -2,8 +2,7 @@ import { requireApiUser } from "@/lib/auth";
 import { jsonError } from "@/lib/http";
 import { getLatestCompanyContext } from "@/lib/acg/context";
 import { generateRecommendations } from "@/services/recommendation-engine/engine";
-import { MODULE_CATALOG } from "@/config/modules";
-import { PACKAGE_CATALOG } from "@/config/packages";
+import { ensureCatalogSeeded } from "@/lib/acg/catalog-sync";
 
 export async function GET() {
   const auth = await requireApiUser();
@@ -12,6 +11,12 @@ export async function GET() {
   }
 
   const { supabase, user } = auth;
+  try {
+    await ensureCatalogSeeded();
+  } catch (error) {
+    return jsonError(error instanceof Error ? error.message : "Catalog sync failed.", 500);
+  }
+
   const context = await getLatestCompanyContext(supabase, user.id);
   if (!context) {
     return jsonError("No onboarding context found. Complete onboarding first.", 404);

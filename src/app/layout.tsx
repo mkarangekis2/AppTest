@@ -53,6 +53,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <Link className="nav-link" href={"/packages" as Route}>
                   Packages
                 </Link>
+                <Link className="nav-link" href={"/workflows" as Route}>
+                  Workflows
+                </Link>
+                <Link className="nav-link" href={"/activity" as Route}>
+                  Activity
+                </Link>
                 <Link className="nav-link" href={"/legacy" as Route}>
                   Legacy
                 </Link>
