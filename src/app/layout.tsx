@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { Route } from "next";
-import { Fraunces, Manrope } from "next/font/google";
+import { Sora, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { getOptionalUser } from "@/lib/auth";
 import { SignOutButton } from "@/components/sign-out-button";
 import { AppNavigation } from "@/components/app-navigation";
 
-const headlineFont = Fraunces({
+const headingFont = Sora({
   subsets: ["latin"],
-  variable: "--font-headline",
-  weight: ["400", "600", "700"]
+  variable: "--font-heading",
+  weight: ["500", "600", "700"]
 });
 
-const uiFont = Manrope({
+const uiFont = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-ui",
   weight: ["400", "500", "600", "700"]
@@ -46,14 +46,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en">
-      <body className={`${headlineFont.variable} ${uiFont.variable}`}>
+      <body className={`${headingFont.variable} ${uiFont.variable}`}>
         <div className="app-shell">
           <aside className="app-sidebar">
             <Link href={"/" as Route} className="sidebar-brand">
               <span className="brand-mark">ACG</span>
-              <div className="stack tight">
-                <div className="eyebrow">Augmentation Consulting Group Inc.</div>
-                <strong>AI Operations Platform</strong>
+              <div className="brand-meta">
+                <span className="brand-company">Augmentation Consulting Group Inc.</span>
+                <strong className="brand-product">AI Operations Platform</strong>
               </div>
             </Link>
             <AppNavigation items={nav} />
@@ -64,18 +64,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </aside>
           <main className="app-main">
             <header className="topbar">
-              <div className="brand-block">
-                <div className="brand-kicker">
-                  <span className="badge info">ACG Platform</span>
-                  <span className="badge">Install systems, run better operations</span>
-                </div>
-                <div className="brand-title">Build and operate AI-powered business systems</div>
-                <div className="brand-copy">
-                  Onboard your operating model, generate explainable recommendations, install modules, and run AI apps with
-                  full operational visibility.
+              <div className="topbar-title">
+                <div className="topbar-kicker">ACG Operations OS</div>
+                <div className="topbar-heading">Command layer for AI-guided business execution</div>
+                <div className="topbar-copy">
+                  Analyze operations, install systems, run workflows, and ship AI apps in one workspace.
                 </div>
               </div>
-              <div className="stack tight" style={{ justifyItems: "end" }}>
+              <div className="stack tight topbar-actions" style={{ justifyItems: "end" }}>
                 <nav className="topnav">
                   <Link className="nav-link" href={"/" as Route}>
                     Home
@@ -84,7 +80,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                     AI Apps
                   </Link>
                 </nav>
-                {user ? <SignOutButton /> : <Link href="/login">Sign in</Link>}
+                {user ? <SignOutButton /> : <Link className="button secondary compact" href="/login">Sign in</Link>}
               </div>
             </header>
             <div className="shell">{children}</div>

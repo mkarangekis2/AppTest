@@ -7,27 +7,27 @@ export default async function LandingPage() {
 
   return (
     <div className="shell-grid">
-      <section className="hero card mission-hero">
+      <section className="hero card mission-hero hero-prime">
         <div className="badge-row">
           <span className="badge info">ACG AI Operations Platform</span>
           <span className="badge">Augmentation Consulting Group Inc. product</span>
         </div>
         <div className="section-heading">
-          <div className="eyebrow">Install systems, not disconnected tools</div>
+          <div className="eyebrow">Operating system for SMB execution teams</div>
           <h1 className="display-title" style={{ margin: 0 }}>
-            Run your business with AI apps, workflow systems, and explainable operational guidance
+            Install operational systems. Run the business from one command layer.
           </h1>
         </div>
         <p className="lede">
-          ACG provides a full operations layer: onboarding diagnostics, analysis and recommendation engines, installable
-          module systems, and company-specific AI apps your teams can run every day.
+          Replace scattered tools and fragmented processes with guided onboarding, explainable recommendations,
+          workflow automation, and role-specific AI apps your teams use daily.
         </p>
         <div className="hero-actions">
           <Link className="button" href={(user ? "/onboarding" : "/login") as Route}>
             Analyze My Business
           </Link>
           <Link className="button secondary" href={(user ? "/apps" : "/login") as Route}>
-            Build AI Apps
+            Open App Studio
           </Link>
         </div>
       </section>
@@ -51,16 +51,16 @@ export default async function LandingPage() {
       </section>
 
       <section className="grid two">
-        <article className="card stack">
+        <article className="card stack card-dark">
           <div className="section-heading">
-            <div className="eyebrow">Who this is for</div>
-            <h2 style={{ margin: 0 }}>Owner-led and manager-led SMB teams</h2>
+            <div className="eyebrow">Impact</div>
+            <h2 style={{ margin: 0 }}>Where teams see improvement first</h2>
           </div>
           <ul className="list-tight">
-            <li>IT and managed services</li>
-            <li>Construction and trades</li>
-            <li>Professional services and advisory</li>
-            <li>Staffing, logistics, and operations-heavy teams</li>
+            <li>Lead response and follow-up speed</li>
+            <li>Operational consistency and handoff quality</li>
+            <li>Reduced manual admin and reporting overhead</li>
+            <li>Executive visibility across delivery and revenue</li>
           </ul>
         </article>
         <article className="card stack">
