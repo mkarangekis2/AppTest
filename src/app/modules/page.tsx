@@ -11,6 +11,7 @@ export default async function ModulesPage() {
         <div className="badge-row">
           <span className="badge info">Module marketplace</span>
           <span className="badge ghost">Phase 3 scaffold</span>
+          <span className="badge">{MODULE_CATALOG.length} launch modules</span>
         </div>
         <div className="section-heading">
           <div className="eyebrow">Modules</div>

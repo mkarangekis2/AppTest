@@ -14,7 +14,11 @@ export async function ensureCatalogSeeded() {
     expected_outcomes_json: item.expectedOutcomes,
     config_json: {
       complexity: item.complexity,
-      setup_estimate: item.setupEstimate
+      setup_estimate: item.setupEstimate,
+      default_workflows: item.defaultWorkflows,
+      prompt_hooks: item.promptHooks,
+      dashboard_widgets: item.dashboardWidgets,
+      analytics_events: item.analyticsEvents
     },
     required_integrations_json: item.requiredIntegrations,
     updated_at: new Date().toISOString()
@@ -44,7 +48,9 @@ export async function ensureCatalogSeeded() {
       .map((slug) => moduleIdBySlug.get(slug))
       .filter((id): id is string => Boolean(id)),
     config_json: {
-      setup_estimate: item.setupEstimate
+      setup_estimate: item.setupEstimate,
+      roi_story: item.roiStory || null,
+      best_fit: item.bestFit || null
     },
     updated_at: new Date().toISOString()
   }));

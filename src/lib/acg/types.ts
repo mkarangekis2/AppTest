@@ -45,6 +45,10 @@ export type ModuleDefinition = {
   requiredIntegrations: string[];
   complexity: "low" | "medium" | "high";
   setupEstimate: string;
+  defaultWorkflows: string[];
+  promptHooks: string[];
+  dashboardWidgets: string[];
+  analyticsEvents: string[];
 };
 
 export type PackageDefinition = {
@@ -54,6 +58,8 @@ export type PackageDefinition = {
   description: string;
   includedModuleSlugs: string[];
   setupEstimate: string;
+  roiStory?: string;
+  bestFit?: string;
 };
 
 export type RecommendationItem = {

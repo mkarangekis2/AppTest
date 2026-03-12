@@ -11,6 +11,7 @@ export default async function PackagesPage() {
         <div className="badge-row">
           <span className="badge info">Package marketplace</span>
           <span className="badge ghost">Phase 3 scaffold</span>
+          <span className="badge">{PACKAGE_CATALOG.length} launch packages</span>
         </div>
         <div className="section-heading">
           <div className="eyebrow">Packages</div>

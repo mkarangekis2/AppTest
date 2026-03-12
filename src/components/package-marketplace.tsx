@@ -41,6 +41,18 @@ export function PackageMarketplace({ packages }: { packages: PackageDefinition[]
             </div>
             <h3 style={{ margin: 0 }}>{pkg.name}</h3>
             <p className="muted">{pkg.description}</p>
+            {pkg.bestFit ? (
+              <div className="packet-block">
+                <div className="eyebrow">Best fit</div>
+                <div>{pkg.bestFit}</div>
+              </div>
+            ) : null}
+            {pkg.roiStory ? (
+              <div className="packet-block">
+                <div className="eyebrow">ROI story</div>
+                <div>{pkg.roiStory}</div>
+              </div>
+            ) : null}
             <div className="packet-block">
               <div className="eyebrow">Included modules</div>
               <ul className="list-tight">
