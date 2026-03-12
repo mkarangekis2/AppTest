@@ -1,9 +1,22 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { Route } from "next";
+import { Fraunces, Manrope } from "next/font/google";
 import "./globals.css";
 import { getOptionalUser } from "@/lib/auth";
 import { SignOutButton } from "@/components/sign-out-button";
+
+const headlineFont = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-headline",
+  weight: ["400", "600", "700"]
+});
+
+const uiFont = Manrope({
+  subsets: ["latin"],
+  variable: "--font-ui",
+  weight: ["400", "500", "600", "700"]
+});
 
 export const metadata: Metadata = {
   title: "ACG AI Operations Platform",
@@ -15,7 +28,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en">
-      <body>
+      <body className={`${headlineFont.variable} ${uiFont.variable}`}>
         <div className="shell">
           <header className="topbar">
             <div className="brand-block">
