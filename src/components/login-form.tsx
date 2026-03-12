@@ -41,7 +41,7 @@ export function LoginForm() {
     <form className="card stack" onSubmit={handleSubmit}>
       <div className="section-heading">
         <div className="eyebrow">Authentication</div>
-        <h2 style={{ margin: 0 }}>Enter proctor credentials</h2>
+        <h2 style={{ margin: 0 }}>Enter your workspace credentials</h2>
       </div>
       <div className="field">
         <label htmlFor="mode">Mode</label>
@@ -66,9 +66,9 @@ export function LoginForm() {
         />
       </div>
       <div className="packet-block">
-        <div className="eyebrow">Training control notice</div>
+        <div className="eyebrow">Workspace notice</div>
         <div className="muted">
-          Sign in provides access to CONOP planning, scenario approval, live session control, and after-action review.
+          Sign in provides access to onboarding, analysis, recommendations, and operational dashboards.
         </div>
       </div>
       {error ? <div className="muted">{error}</div> : null}

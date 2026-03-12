@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import type { Route } from "next";
 import "./globals.css";
 import { getOptionalUser } from "@/lib/auth";
 import { SignOutButton } from "@/components/sign-out-button";
 
 export const metadata: Metadata = {
-  title: "Injury Point",
-  description: "An Augmentation Consulting Group Inc. training and evaluation platform for proctor-led casualty lanes."
+  title: "ACG AI Operations Platform",
+  description: "An Augmentation Consulting Group Inc. product for AI-guided SMB operations analysis, recommendations, and modular systems."
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -19,23 +20,35 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <header className="topbar">
             <div className="brand-block">
               <div className="brand-kicker">
-                <span className="brand-mark">IP</span>
-                <div className="eyebrow">Injury Point</div>
-                <span className="badge info">Training-only scenario control</span>
+                <span className="brand-mark">ACG</span>
+                <div className="eyebrow">ACG AI Operations Platform</div>
+                <span className="badge info">Augmentation Consulting Group Inc.</span>
               </div>
-              <div className="brand-title">Proctor-led casualty lanes from CONOP through AAR</div>
+              <div className="brand-title">Install operational systems that run your business better</div>
               <div className="brand-copy">
-                An Augmentation Consulting Group Inc. product for mission-aligned scenario generation, proctor-controlled
-                lane execution, and standardized after-action evaluation.
+                Diagnose operational bottlenecks, receive explainable recommendations, and activate modular systems with
+                workflow visibility.
               </div>
             </div>
             <div className="stack tight" style={{ justifyItems: "end" }}>
               <nav className="topnav">
-                <Link className="nav-link" href="/">
+                <Link className="nav-link" href={"/" as Route}>
+                  Home
+                </Link>
+                <Link className="nav-link" href={"/dashboard" as Route}>
                   Dashboard
                 </Link>
-                <Link className="nav-link" href="/conops/new">
-                  New CONOP
+                <Link className="nav-link" href={"/onboarding" as Route}>
+                  Onboarding
+                </Link>
+                <Link className="nav-link" href={"/analysis" as Route}>
+                  Analysis
+                </Link>
+                <Link className="nav-link" href={"/recommendations" as Route}>
+                  Recommendations
+                </Link>
+                <Link className="nav-link" href={"/legacy" as Route}>
+                  Legacy
                 </Link>
               </nav>
               {user ? <SignOutButton /> : <Link href="/login">Sign in</Link>}
