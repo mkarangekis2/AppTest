@@ -37,7 +37,13 @@ export default async function SettingsPage() {
       <PageHeader
         eyebrow="Settings"
         title="Company profile, AI behavior, and usage controls"
-        badges={<span className="badge info">Settings and entitlements</span>}
+        description="Manage workspace identity, AI behavior policies, and subscription-level telemetry."
+        badges={
+          <>
+            <span className="badge info">Settings and entitlements</span>
+            <span className="badge ghost">{context.company.name}</span>
+          </>
+        }
       />
 
       <SettingsConsole initialCompanyName={context.company.name} initialWebsite={context.company.website || ""} />

@@ -44,6 +44,9 @@ export function LoginForm() {
         <div className="eyebrow">Authentication</div>
         <h2 style={{ margin: 0 }}>Enter your workspace credentials</h2>
       </div>
+      <div className="badge-row">
+        <span className="badge info">{mode === "login" ? "Secure sign in" : "Create workspace access"}</span>
+      </div>
       <div className="field">
         <label htmlFor="mode">Mode</label>
         <select id="mode" value={mode} onChange={(event) => setMode(event.target.value as "login" | "signup")}>
@@ -73,9 +76,11 @@ export function LoginForm() {
         </div>
       </div>
       {error ? <Notice tone="error">{error}</Notice> : null}
-      <button type="submit" disabled={pending}>
-        {pending ? "Working..." : mode === "login" ? "Sign in" : "Create account"}
-      </button>
+      <div className="action-row">
+        <button type="submit" disabled={pending}>
+          {pending ? "Working..." : mode === "login" ? "Sign in" : "Create account"}
+        </button>
+      </div>
     </form>
   );
 }

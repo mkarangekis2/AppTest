@@ -10,6 +10,7 @@ export default async function IndustryPacksPage() {
       <PageHeader
         eyebrow="Vertical acceleration"
         title="Preconfigured module stacks and KPI presets by industry"
+        description="Deploy sector-specific operating stacks with curated workflows and KPI lenses."
         badges={
           <>
             <span className="badge info">Industry packs</span>

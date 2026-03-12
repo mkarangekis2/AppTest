@@ -11,6 +11,7 @@ export default async function ModulesPage() {
       <PageHeader
         eyebrow="Modules"
         title="Install operational systems by capability"
+        description="Browse launch-ready module systems, review complexity, and deploy by business objective."
         badges={
           <>
             <span className="badge info">Module marketplace</span>

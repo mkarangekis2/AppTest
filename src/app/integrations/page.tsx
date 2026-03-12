@@ -37,6 +37,7 @@ export default async function IntegrationsPage() {
       <PageHeader
         eyebrow="Integrations"
         title="Connect external systems to activate automation"
+        description="Link key providers to expand workflow automation and improve operational telemetry."
         badges={
           <>
             <span className="badge info">Integrations</span>

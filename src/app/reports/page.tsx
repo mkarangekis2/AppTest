@@ -37,6 +37,7 @@ export default async function ReportsPage() {
       <PageHeader
         eyebrow="Reports"
         title="Operational health and revenue visibility"
+        description="Executive command view for growth, risk, retention, and automation reliability."
         badges={
           <>
             <span className="badge info">Executive dashboard</span>
@@ -55,6 +56,24 @@ export default async function ReportsPage() {
           { label: "Workflow success", value: `${successRate}%`, note: "Completed workflow run ratio" }
         ]}
       />
+
+      <section className="grid three">
+        <article className="card stack">
+          <div className="eyebrow">Revenue risk</div>
+          <div className="muted">At-risk opportunities: {atRiskOpps}</div>
+          <div className="muted">Pipeline value: ${pipelineValue.toLocaleString()}</div>
+        </article>
+        <article className="card stack">
+          <div className="eyebrow">Retention risk</div>
+          <div className="muted">High churn-risk clients: {churnRisk}</div>
+          <div className="muted">Total clients: {(clientsResult.data || []).length}</div>
+        </article>
+        <article className="card stack card-dark">
+          <div className="eyebrow">Automation health</div>
+          <div className="muted">Workflow success rate: {successRate}%</div>
+          <div className="muted">Total runs observed: {totalRuns}</div>
+        </article>
+      </section>
 
       <section className="grid two">
         <article className="card stack">

@@ -9,17 +9,19 @@ export default async function DashboardPage() {
   const { supabase, user } = await requireUser();
   const context = await getLatestCompanyContext(supabase, user.id);
   const analysis = context ? generateBusinessAnalysis(context.payload) : null;
+  const stage = context ? "Workspace active" : "Workspace not initialized";
 
   return (
     <div className="shell-grid">
       <PageHeader
         eyebrow="Dashboard"
-        title="ACG AI Operations Platform"
-        description="Run onboarding, business analysis, and recommendation workflows. Install operations systems in controlled phases."
+        title="Operational command center"
+        description="Track platform readiness, run diagnostic-to-install flows, and launch execution workflows with full visibility."
         badges={
           <>
             <span className="badge info">Operations command center</span>
             <span className="badge ghost">Platform overview</span>
+            <span className={`badge ${context ? "success" : "warning"}`}>{stage}</span>
           </>
         }
         actions={
@@ -52,7 +54,47 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      <section className="grid two">
+      <section className="split">
+        <div className="card stack">
+          <div className="section-heading">
+            <div className="eyebrow">Readiness snapshot</div>
+            <h2 style={{ margin: 0 }}>Current operational posture</h2>
+          </div>
+          <div className="timeline-list">
+            <div className="timeline-item">
+              <div className="badge-row">
+                <span className={`badge ${context ? "success" : "warning"}`}>{context ? "Configured" : "Pending"}</span>
+                <span className="badge ghost">Onboarding profile</span>
+              </div>
+              <div className="muted">
+                {context
+                  ? `${context.company.name} profile available with industry context and maturity inputs.`
+                  : "Initialize your workspace profile to unlock analysis and recommendation outputs."}
+              </div>
+            </div>
+            <div className="timeline-item">
+              <div className="badge-row">
+                <span className={`badge ${analysis ? "success" : "warning"}`}>{analysis ? "Ready" : "Pending"}</span>
+                <span className="badge ghost">Business analysis</span>
+              </div>
+              <div className="muted">
+                {analysis
+                  ? "Analysis scores are available. Proceed to recommendations and installs."
+                  : "Analysis is generated immediately after onboarding completes."}
+              </div>
+            </div>
+            <div className="timeline-item">
+              <div className="badge-row">
+                <span className="badge info">Next step</span>
+                <span className="badge ghost">Action queue</span>
+              </div>
+              <div className="muted">
+                Start with onboarding, then deploy the first module/package set with the highest expected impact.
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="card stack">
           <div className="section-heading">
             <div className="eyebrow">Platform flow</div>
@@ -66,20 +108,24 @@ export default async function DashboardPage() {
             <li>Workflow activation and visibility</li>
           </ol>
         </div>
-        <div className="card stack">
-          <div className="section-heading">
-            <div className="eyebrow">AI app workspace</div>
-            <h2 style={{ margin: 0 }}>Operational AI apps for each team</h2>
-          </div>
-          <p className="muted">
-            Build internal apps for proposal drafting, support response generation, planning support, and reporting workflows.
-          </p>
-          <div>
-            <Link className="button secondary" href={"/apps" as Route}>
-              Open AI Apps
-            </Link>
-          </div>
-        </div>
+      </section>
+
+      <section className="grid three">
+        <Link className="card-link" href={"/apps" as Route}>
+          <div className="eyebrow">AI app workspace</div>
+          <strong>Build operational AI apps</strong>
+          <span className="muted">Create reusable prompt-driven apps for support, planning, and reporting workflows.</span>
+        </Link>
+        <Link className="card-link" href={"/workflows" as Route}>
+          <div className="eyebrow">Workflow engine</div>
+          <strong>Automate execution paths</strong>
+          <span className="muted">Model trigger-condition-action logic and run it in a controlled execution lane.</span>
+        </Link>
+        <Link className="card-link" href={"/reports" as Route}>
+          <div className="eyebrow">Executive visibility</div>
+          <strong>Track business outcomes</strong>
+          <span className="muted">Monitor pipeline, churn, and workflow reliability through KPI dashboards.</span>
+        </Link>
       </section>
     </div>
   );

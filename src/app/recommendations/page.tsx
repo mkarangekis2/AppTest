@@ -35,19 +35,22 @@ export default async function RecommendationsPage() {
       <PageHeader
         eyebrow="Recommendations"
         title={`Recommended systems for ${context.company.name}`}
+        description="Actionable install sequence generated from your onboarding profile and operating constraints."
         badges={
           <>
             <span className="badge info">Recommendation engine</span>
             <span className="badge ghost">Config-driven and explainable</span>
+            <span className="badge">{items.length} recommendations</span>
           </>
         }
       />
 
       {items.length ? (
         <section className="grid two">
-          {items.map((item) => (
+          {items.map((item, index) => (
             <article key={`${item.recommendationType}:${item.slug}`} className="card stack">
               <div className="badge-row">
+                <span className="badge info">Priority {index + 1}</span>
                 <span className="badge">{item.recommendationType}</span>
                 <span className={`badge ${item.expectedImpact === "high" ? "warning" : ""}`}>{item.expectedImpact} impact</span>
                 <span className="badge ghost">{item.implementationComplexity} complexity</span>

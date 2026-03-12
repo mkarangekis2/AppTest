@@ -68,34 +68,53 @@ export function KnowledgeWorkspace() {
   }
 
   return (
-    <div className="grid two">
-      <section className="card stack">
-        <div className="section-heading">
-          <div className="eyebrow">Document upload</div>
-          <h2 style={{ margin: 0 }}>Index SOPs and internal knowledge</h2>
-        </div>
-        <div className="field">
-          <label htmlFor="doc-title">Title</label>
-          <input id="doc-title" value={title} onChange={(event) => setTitle(event.target.value)} />
-        </div>
-        <div className="field">
-          <label htmlFor="doc-type">Document type</label>
-          <select id="doc-type" value={documentType} onChange={(event) => setDocumentType(event.target.value)}>
-            <option value="sop">SOP</option>
-            <option value="playbook">Playbook</option>
-            <option value="policy">Policy</option>
-            <option value="guide">Guide</option>
-          </select>
-        </div>
-        <div className="field">
-          <label htmlFor="doc-content">Content</label>
-          <textarea id="doc-content" value={content} onChange={(event) => setContent(event.target.value)} />
-        </div>
-        <div className="action-row">
-          <button disabled={!title.trim() || !content.trim() || pending !== null} onClick={uploadDocument}>
-            {pending === "upload" ? "Indexing..." : "Upload and index"}
-          </button>
-        </div>
+    <div className="shell-grid">
+      <section className="split">
+        <article className="card stack">
+          <div className="section-heading">
+            <div className="eyebrow">Document upload</div>
+            <h2 style={{ margin: 0 }}>Index SOPs and internal knowledge</h2>
+          </div>
+          <div className="field">
+            <label htmlFor="doc-title">Title</label>
+            <input id="doc-title" value={title} onChange={(event) => setTitle(event.target.value)} />
+          </div>
+          <div className="field">
+            <label htmlFor="doc-type">Document type</label>
+            <select id="doc-type" value={documentType} onChange={(event) => setDocumentType(event.target.value)}>
+              <option value="sop">SOP</option>
+              <option value="playbook">Playbook</option>
+              <option value="policy">Policy</option>
+              <option value="guide">Guide</option>
+            </select>
+          </div>
+          <div className="field">
+            <label htmlFor="doc-content">Content</label>
+            <textarea id="doc-content" value={content} onChange={(event) => setContent(event.target.value)} />
+          </div>
+          <div className="action-row">
+            <button disabled={!title.trim() || !content.trim() || pending !== null} onClick={uploadDocument}>
+              {pending === "upload" ? "Indexing..." : "Upload and index"}
+            </button>
+          </div>
+        </article>
+
+        <article className="card stack card-dark">
+          <div className="section-heading">
+            <div className="eyebrow">Knowledge operations</div>
+            <h2 style={{ margin: 0 }}>Recommended indexing workflow</h2>
+          </div>
+          <ul className="list-tight">
+            <li>Upload clean SOP content with clear section structure.</li>
+            <li>Use consistent document types for better retrieval grouping.</li>
+            <li>Run targeted queries before broad operational rollout.</li>
+            <li>Treat indexed outputs as advisor context, not policy replacement.</li>
+          </ul>
+          <div className="packet-block">
+            <div className="eyebrow">Search status</div>
+            <div className="muted">{status || "No retrieval query run yet."}</div>
+          </div>
+        </article>
       </section>
 
       <section className="card stack">

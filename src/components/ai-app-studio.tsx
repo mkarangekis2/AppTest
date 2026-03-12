@@ -139,55 +139,75 @@ export function AiAppStudio({ initialApps }: Props) {
   }
 
   return (
-    <div className="grid two">
-      <section className="card stack">
-        <div className="section-heading">
-          <div className="eyebrow">Create app</div>
-          <h2 style={{ margin: 0 }}>Define a reusable AI workflow</h2>
-        </div>
-        <div className="field">
-          <label htmlFor="app-name">App name</label>
-          <input id="app-name" value={name} onChange={(event) => setName(event.target.value)} placeholder="Support response assistant" />
-        </div>
-        <div className="field">
-          <label htmlFor="app-description">Description</label>
-          <textarea
-            id="app-description"
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            placeholder="What this app does and who should use it"
-          />
-        </div>
-        <div className="grid two">
-          <div className="field">
-            <label htmlFor="app-provider">Provider</label>
-            <select
-              id="app-provider"
-              value={provider}
-              onChange={(event) => {
-                const next = event.target.value as "openai" | "anthropic";
-                setProvider(next);
-                setModel(next === "openai" ? "gpt-4.1" : "claude-3-7-sonnet-latest");
-              }}
-            >
-              <option value="openai">OpenAI</option>
-              <option value="anthropic">Anthropic</option>
-            </select>
+    <div className="shell-grid">
+      <section className="grid two">
+        <article className="card stack">
+          <div className="section-heading">
+            <div className="eyebrow">Create app</div>
+            <h2 style={{ margin: 0 }}>Define a reusable AI workflow</h2>
           </div>
           <div className="field">
-            <label htmlFor="app-model">Model</label>
-            <input id="app-model" value={model} onChange={(event) => setModel(event.target.value)} />
+            <label htmlFor="app-name">App name</label>
+            <input id="app-name" value={name} onChange={(event) => setName(event.target.value)} placeholder="Support response assistant" />
           </div>
-        </div>
-        <div className="field">
-          <label htmlFor="app-system-prompt">System prompt</label>
-          <textarea id="app-system-prompt" value={systemPrompt} onChange={(event) => setSystemPrompt(event.target.value)} />
-        </div>
-        <div className="action-row">
-          <button onClick={createApp} disabled={pendingCreate || !name.trim() || !model.trim() || !systemPrompt.trim()}>
-            {pendingCreate ? "Creating..." : "Create AI App"}
-          </button>
-        </div>
+          <div className="field">
+            <label htmlFor="app-description">Description</label>
+            <textarea
+              id="app-description"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder="What this app does and who should use it"
+            />
+          </div>
+          <div className="grid two">
+            <div className="field">
+              <label htmlFor="app-provider">Provider</label>
+              <select
+                id="app-provider"
+                value={provider}
+                onChange={(event) => {
+                  const next = event.target.value as "openai" | "anthropic";
+                  setProvider(next);
+                  setModel(next === "openai" ? "gpt-4.1" : "claude-3-7-sonnet-latest");
+                }}
+              >
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic</option>
+              </select>
+            </div>
+            <div className="field">
+              <label htmlFor="app-model">Model</label>
+              <input id="app-model" value={model} onChange={(event) => setModel(event.target.value)} />
+            </div>
+          </div>
+          <div className="field">
+            <label htmlFor="app-system-prompt">System prompt</label>
+            <textarea id="app-system-prompt" value={systemPrompt} onChange={(event) => setSystemPrompt(event.target.value)} />
+          </div>
+          <div className="action-row">
+            <button onClick={createApp} disabled={pendingCreate || !name.trim() || !model.trim() || !systemPrompt.trim()}>
+              {pendingCreate ? "Creating..." : "Create AI App"}
+            </button>
+          </div>
+        </article>
+
+        <article className="card stack card-dark">
+          <div className="section-heading">
+            <div className="eyebrow">Studio guidance</div>
+            <h2 style={{ margin: 0 }}>How to build reliable internal AI apps</h2>
+          </div>
+          <ul className="list-tight">
+            <li>Keep system prompts role-specific and operationally constrained.</li>
+            <li>Use concise run prompts with clear outcome expectations.</li>
+            <li>Review output history and latency before production use.</li>
+            <li>Use provider/model selection to balance quality and cost.</li>
+          </ul>
+          <div className="packet-block">
+            <div className="eyebrow">Workspace state</div>
+            <div className="muted">Configured apps: {apps.length}</div>
+            <div className="muted">Selected app: {selectedApp?.name || "None selected"}</div>
+          </div>
+        </article>
       </section>
 
       <section className="card stack">
@@ -195,7 +215,6 @@ export function AiAppStudio({ initialApps }: Props) {
           <div className="eyebrow">Run app</div>
           <h2 style={{ margin: 0 }}>Execute and inspect outputs</h2>
         </div>
-
         <div className="field">
           <label htmlFor="app-select">Select app</label>
           <select id="app-select" value={selectedAppId} onChange={(event) => setSelectedAppId(event.target.value)}>
@@ -207,7 +226,6 @@ export function AiAppStudio({ initialApps }: Props) {
             ))}
           </select>
         </div>
-
         <div className="field">
           <label htmlFor="run-prompt">Run prompt</label>
           <textarea
@@ -217,7 +235,6 @@ export function AiAppStudio({ initialApps }: Props) {
             placeholder="Enter the business request for this app..."
           />
         </div>
-
         <div className="action-row">
           <button onClick={runSelectedApp} disabled={!selectedApp || pendingRun || !runPrompt.trim()}>
             {pendingRun ? "Running..." : "Run AI App"}

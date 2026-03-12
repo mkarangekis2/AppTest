@@ -56,56 +56,71 @@ export function SettingsConsole({
   }
 
   return (
-    <section className="card stack">
-      <div className="section-heading">
-        <div className="eyebrow">Settings</div>
-        <h2 style={{ margin: 0 }}>Company and AI behavior controls</h2>
-      </div>
-      <div className="grid two">
-        <div className="field">
-          <label htmlFor="companyName">Company name</label>
-          <input
-            id="companyName"
-            value={state.companyName}
-            onChange={(event) => setState((prev) => ({ ...prev, companyName: event.target.value }))}
-          />
+    <section className="split">
+      <article className="card stack">
+        <div className="section-heading">
+          <div className="eyebrow">Settings</div>
+          <h2 style={{ margin: 0 }}>Company and AI behavior controls</h2>
         </div>
-        <div className="field">
-          <label htmlFor="website">Website</label>
-          <input
-            id="website"
-            value={state.website}
-            onChange={(event) => setState((prev) => ({ ...prev, website: event.target.value }))}
-          />
+        <div className="grid two">
+          <div className="field">
+            <label htmlFor="companyName">Company name</label>
+            <input
+              id="companyName"
+              value={state.companyName}
+              onChange={(event) => setState((prev) => ({ ...prev, companyName: event.target.value }))}
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="website">Website</label>
+            <input
+              id="website"
+              value={state.website}
+              onChange={(event) => setState((prev) => ({ ...prev, website: event.target.value }))}
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="brandVoice">Brand voice</label>
+            <input
+              id="brandVoice"
+              value={state.brandVoice}
+              onChange={(event) => setState((prev) => ({ ...prev, brandVoice: event.target.value }))}
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="aiMode">AI mode</label>
+            <select
+              id="aiMode"
+              value={state.aiMode}
+              onChange={(event) => setState((prev) => ({ ...prev, aiMode: event.target.value }))}
+            >
+              <option value="balanced">Balanced</option>
+              <option value="conservative">Conservative</option>
+              <option value="aggressive">Aggressive</option>
+            </select>
+          </div>
         </div>
-        <div className="field">
-          <label htmlFor="brandVoice">Brand voice</label>
-          <input
-            id="brandVoice"
-            value={state.brandVoice}
-            onChange={(event) => setState((prev) => ({ ...prev, brandVoice: event.target.value }))}
-          />
+        {error ? <Notice tone="error">{error}</Notice> : null}
+        {saved ? <Notice tone="success">Settings saved.</Notice> : null}
+        <div>
+          <button disabled={pending} onClick={save}>
+            {pending ? "Saving..." : "Save settings"}
+          </button>
         </div>
-        <div className="field">
-          <label htmlFor="aiMode">AI mode</label>
-          <select
-            id="aiMode"
-            value={state.aiMode}
-            onChange={(event) => setState((prev) => ({ ...prev, aiMode: event.target.value }))}
-          >
-            <option value="balanced">Balanced</option>
-            <option value="conservative">Conservative</option>
-            <option value="aggressive">Aggressive</option>
-          </select>
+      </article>
+
+      <article className="card stack card-dark">
+        <div className="section-heading">
+          <div className="eyebrow">Policy guidance</div>
+          <h3 style={{ margin: 0 }}>Configuration recommendations</h3>
         </div>
-      </div>
-      {error ? <Notice tone="error">{error}</Notice> : null}
-      {saved ? <Notice tone="success">Settings saved.</Notice> : null}
-      <div>
-        <button disabled={pending} onClick={save}>
-          {pending ? "Saving..." : "Save settings"}
-        </button>
-      </div>
+        <ul className="list-tight">
+          <li>Use conservative mode for regulated workflows and sensitive operations.</li>
+          <li>Use balanced mode for general-purpose internal productivity tasks.</li>
+          <li>Set explicit brand voice guidance to keep output quality consistent.</li>
+          <li>Review settings monthly as modules and workflows expand.</li>
+        </ul>
+      </article>
     </section>
   );
 }

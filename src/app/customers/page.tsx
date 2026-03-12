@@ -41,12 +41,15 @@ export default async function CustomersPage() {
   const leads = leadsResult.data || [];
   const clients = clientsResult.data || [];
   const opportunities = oppsResult.data || [];
+  const atRisk = opportunities.filter((item) => item.risk_level === "high").length;
+  const pipeline = opportunities.reduce((sum, item) => sum + Number(item.value || 0), 0);
 
   return (
     <div className="shell-grid">
       <PageHeader
         eyebrow="Customers"
         title="Leads, opportunities, and client health in one surface"
+        description="Operational customer view for demand, risk, and growth signal tracking."
         badges={
           <>
             <span className="badge info">Customer operations view</span>
@@ -54,6 +57,29 @@ export default async function CustomersPage() {
           </>
         }
       />
+
+      <section className="metric-grid">
+        <div className="metric-card">
+          <div className="metric-label">Lead volume</div>
+          <div className="metric-value">{leads.length}</div>
+          <div className="muted">Recent inbound prospects</div>
+        </div>
+        <div className="metric-card">
+          <div className="metric-label">Client records</div>
+          <div className="metric-value">{clients.length}</div>
+          <div className="muted">Tracked customer accounts</div>
+        </div>
+        <div className="metric-card">
+          <div className="metric-label">Open pipeline</div>
+          <div className="metric-value">${pipeline.toLocaleString()}</div>
+          <div className="muted">Opportunity value</div>
+        </div>
+        <div className="metric-card">
+          <div className="metric-label">At-risk opportunities</div>
+          <div className="metric-value">{atRisk}</div>
+          <div className="muted">High-risk deals requiring attention</div>
+        </div>
+      </section>
 
       <section className="grid two">
         <TableShell title="Recent inbound prospects" subtitle="Leads">
@@ -72,7 +98,7 @@ export default async function CustomersPage() {
                   <tr key={lead.id}>
                     <td>{[lead.first_name, lead.last_name].filter(Boolean).join(" ") || "Unknown"}</td>
                     <td>{lead.company_name || "-"}</td>
-                    <td>{lead.status}</td>
+                    <td><span className="badge ghost">{lead.status}</span></td>
                     <td>{lead.score}</td>
                   </tr>
                 ))
@@ -103,8 +129,8 @@ export default async function CustomersPage() {
                   <tr key={client.id}>
                     <td>{client.name}</td>
                     <td>{client.segment || "-"}</td>
-                    <td>{client.status}</td>
-                    <td>{client.churn_risk}</td>
+                    <td><span className="badge ghost">{client.status}</span></td>
+                    <td><span className={`badge ${client.churn_risk === "high" ? "danger" : client.churn_risk === "medium" ? "warning" : "success"}`}>{client.churn_risk}</span></td>
                   </tr>
                 ))
               ) : (
@@ -131,15 +157,15 @@ export default async function CustomersPage() {
           </thead>
           <tbody>
             {opportunities.length ? (
-              opportunities.map((opportunity) => (
-                <tr key={opportunity.id}>
-                  <td>{opportunity.stage}</td>
-                  <td>${Number(opportunity.value || 0).toLocaleString()}</td>
-                  <td>{opportunity.close_probability}%</td>
-                  <td>{opportunity.risk_level}</td>
-                </tr>
-              ))
-            ) : (
+                opportunities.map((opportunity) => (
+                  <tr key={opportunity.id}>
+                    <td><span className="badge ghost">{opportunity.stage}</span></td>
+                    <td>${Number(opportunity.value || 0).toLocaleString()}</td>
+                    <td>{opportunity.close_probability}%</td>
+                    <td><span className={`badge ${opportunity.risk_level === "high" ? "danger" : opportunity.risk_level === "medium" ? "warning" : "success"}`}>{opportunity.risk_level}</span></td>
+                  </tr>
+                ))
+              ) : (
               <tr>
                 <td colSpan={4}>
                   <EmptyState title="No opportunities yet" />

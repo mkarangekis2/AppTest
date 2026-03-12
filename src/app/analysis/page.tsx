@@ -36,7 +36,12 @@ export default async function AnalysisPage() {
         eyebrow="Analysis"
         title={context.company.name}
         description={analysis.summary}
-        badges={<span className="badge info">Business analysis report</span>}
+        badges={
+          <>
+            <span className="badge info">Business analysis report</span>
+            <span className="badge ghost">Explainable score model</span>
+          </>
+        }
       />
 
       <section className="metric-grid">
@@ -46,6 +51,31 @@ export default async function AnalysisPage() {
         <Metric label="Automation potential" value={analysis.scores.automationPotential} />
         <Metric label="Revenue leakage risk" value={analysis.scores.revenueLeakageRisk} />
         <Metric label="Executive visibility" value={analysis.scores.executiveVisibility} />
+      </section>
+
+      <section className="grid three">
+        <article className="card stack">
+          <div className="eyebrow">Prioritized pain points</div>
+          <ul className="list-tight">
+            {analysis.prioritizedPainPoints.length ? (
+              analysis.prioritizedPainPoints.map((item) => <li key={item}>{item}</li>)
+            ) : (
+              <li>No major pain points identified.</li>
+            )}
+          </ul>
+        </article>
+        <article className="card stack">
+          <div className="eyebrow">Primary recommendation vector</div>
+          <div className="muted">
+            Focus on modules that improve handoffs, speed response cycles, and reduce manual routing overhead.
+          </div>
+        </article>
+        <article className="card stack card-dark">
+          <div className="eyebrow">Readout note</div>
+          <div className="muted">
+            Scores represent comparative operating maturity from your onboarding data and should be reviewed before install sequencing.
+          </div>
+        </article>
       </section>
 
       <section className="grid two">

@@ -23,6 +23,7 @@ export default async function KnowledgePage() {
       <PageHeader
         eyebrow="Knowledge"
         title="Capture, index, and retrieve internal operational knowledge"
+        description="Centralize SOPs and internal reference material for semantic retrieval and workflow context."
         badges={
           <>
             <span className="badge info">Knowledge system</span>

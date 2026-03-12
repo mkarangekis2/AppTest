@@ -11,6 +11,7 @@ export default async function PackagesPage() {
       <PageHeader
         eyebrow="Packages"
         title="Install bundled systems in implementation order"
+        description="Accelerate deployment with preconfigured package bundles mapped to common SMB operating goals."
         badges={
           <>
             <span className="badge info">Package marketplace</span>

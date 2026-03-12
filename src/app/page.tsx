@@ -11,16 +11,17 @@ export default async function LandingPage() {
         <div className="badge-row">
           <span className="badge info">ACG AI Operations Platform</span>
           <span className="badge">Augmentation Consulting Group Inc. product</span>
+          <span className="badge ghost">Enterprise-grade workflow governance</span>
         </div>
         <div className="section-heading">
           <div className="eyebrow">Operating system for SMB execution teams</div>
           <h1 className="display-title" style={{ margin: 0 }}>
-            Install operational systems. Run the business from one command layer.
+            Design operations, deploy systems, and run AI-enabled execution from one control surface.
           </h1>
         </div>
         <p className="lede">
-          Replace scattered tools and fragmented processes with guided onboarding, explainable recommendations,
-          workflow automation, and role-specific AI apps your teams use daily.
+          Replace fragmented tools with a command-ready platform that diagnoses how your business runs, recommends
+          what to install next, and powers daily execution with AI applications, workflows, and KPI visibility.
         </p>
         <div className="hero-actions">
           <Link className="button" href={(user ? "/onboarding" : "/login") as Route}>
@@ -33,59 +34,106 @@ export default async function LandingPage() {
         <div className="hero-metrics">
           <div className="hero-metric">
             <span className="metric-label">Operational domains</span>
-            <strong>12+</strong>
+            <strong>12 mission surfaces</strong>
           </div>
           <div className="hero-metric">
             <span className="metric-label">Launch module library</span>
-            <strong>50 Systems</strong>
+            <strong>50 installable systems</strong>
           </div>
           <div className="hero-metric">
             <span className="metric-label">AI app runtime</span>
-            <strong>OpenAI + Anthropic</strong>
+            <strong>OpenAI + Anthropic model lane</strong>
+          </div>
+          <div className="hero-metric">
+            <span className="metric-label">Execution model</span>
+            <strong>Guided, auditable, explainable</strong>
           </div>
         </div>
       </section>
 
-      <section className="grid three">
-        <div className="card stack">
-          <div className="eyebrow">Diagnostic onboarding</div>
-          <h3 style={{ margin: 0 }}>Capture your operating model</h3>
-          <p className="muted">Collect structured context for lead flow, support, delivery, risk, and growth priorities.</p>
-        </div>
-        <div className="card stack">
-          <div className="eyebrow">Explainable recommendations</div>
-          <h3 style={{ margin: 0 }}>Prioritized installs with rationale</h3>
-          <p className="muted">Get module, package, and industry-pack recommendations with evidence and setup effort.</p>
-        </div>
-        <div className="card stack">
-          <div className="eyebrow">AI app platform</div>
-          <h3 style={{ margin: 0 }}>Create and run internal AI apps</h3>
-          <p className="muted">Build prompt-driven apps per team use case and run them using OpenAI or Anthropic models.</p>
-        </div>
+      <section className="split">
+        <article className="card stack">
+          <div className="section-heading">
+            <div className="eyebrow">What this platform replaces</div>
+            <h2 style={{ margin: 0 }}>Disconnected apps, opaque automation, and non-repeatable execution</h2>
+          </div>
+          <ul className="list-tight">
+            <li>Unclear ownership between sales, delivery, support, and leadership</li>
+            <li>Recommendations with no reason, no order, and no operational evidence</li>
+            <li>Workflows that execute but cannot be audited or improved confidently</li>
+            <li>AI usage without governance, versioning, or output accountability</li>
+          </ul>
+        </article>
+        <article className="card stack card-dark">
+          <div className="section-heading">
+            <div className="eyebrow">What you get instead</div>
+            <h2 style={{ margin: 0 }}>A governed operating layer for business execution</h2>
+          </div>
+          <ul className="list-tight">
+            <li>Diagnostic onboarding and structured business analysis</li>
+            <li>Config-driven recommendations with implementation sequence</li>
+            <li>Installable modules, packages, and vertical-specific presets</li>
+            <li>AI app runtime with run history and output inspection</li>
+          </ul>
+        </article>
       </section>
 
       <section className="grid two">
-        <article className="card stack card-dark">
+        <article className="card stack">
           <div className="section-heading">
-            <div className="eyebrow">Impact</div>
-            <h2 style={{ margin: 0 }}>Where teams see improvement first</h2>
+            <div className="eyebrow">Core platform surfaces</div>
+            <h2 style={{ margin: 0 }}>Everything your team needs to run operations in one place</h2>
           </div>
-          <ul className="list-tight">
-            <li>Lead response and follow-up speed</li>
-            <li>Operational consistency and handoff quality</li>
-            <li>Reduced manual admin and reporting overhead</li>
-            <li>Executive visibility across delivery and revenue</li>
-          </ul>
+          <div className="grid three">
+            <Link className="card-link" href={(user ? "/analysis" : "/login") as Route}>
+              <strong>Business Analysis</strong>
+              <span className="muted">Maturity scoring, risk areas, opportunity areas, and action summary.</span>
+            </Link>
+            <Link className="card-link" href={(user ? "/recommendations" : "/login") as Route}>
+              <strong>Recommendations</strong>
+              <span className="muted">Explainable module and package recommendations with install effort.</span>
+            </Link>
+            <Link className="card-link" href={(user ? "/apps" : "/login") as Route}>
+              <strong>AI App Studio</strong>
+              <span className="muted">Build internal AI apps and inspect every execution output.</span>
+            </Link>
+            <Link className="card-link" href={(user ? "/workflows" : "/login") as Route}>
+              <strong>Workflow Center</strong>
+              <span className="muted">Trigger-condition-action automation with run controls.</span>
+            </Link>
+            <Link className="card-link" href={(user ? "/knowledge" : "/login") as Route}>
+              <strong>Knowledge System</strong>
+              <span className="muted">Upload SOPs and retrieve semantic answers from indexed context.</span>
+            </Link>
+            <Link className="card-link" href={(user ? "/reports" : "/login") as Route}>
+              <strong>Executive Reports</strong>
+              <span className="muted">KPI visibility across pipeline, delivery, and automation health.</span>
+            </Link>
+          </div>
         </article>
         <article className="card stack">
           <div className="section-heading">
-            <div className="eyebrow">Core loop</div>
-            <h2 style={{ margin: 0 }}>Analyze, recommend, install, operate, optimize</h2>
+            <div className="eyebrow">Core operating loop</div>
+            <h2 style={{ margin: 0 }}>Analyze, recommend, install, execute, optimize</h2>
           </div>
-          <p className="muted">
-            Every screen maps to this operating cycle, so teams can move from diagnosis to execution with measurable
-            improvement and consistent governance.
-          </p>
+          <div className="timeline-list">
+            <div className="timeline-item">
+              <div className="eyebrow">01 Diagnostic onboarding</div>
+              <div className="muted">Capture how your business actually runs, where it slows down, and where value leaks.</div>
+            </div>
+            <div className="timeline-item">
+              <div className="eyebrow">02 Explainable recommendation engine</div>
+              <div className="muted">Receive system installs in priority order with impact and complexity guidance.</div>
+            </div>
+            <div className="timeline-item">
+              <div className="eyebrow">03 Controlled deployment</div>
+              <div className="muted">Install modules, workflows, and AI apps into a governed workspace.</div>
+            </div>
+            <div className="timeline-item">
+              <div className="eyebrow">04 Operational command view</div>
+              <div className="muted">Monitor activity, outcomes, risks, and next actions through executive dashboards.</div>
+            </div>
+          </div>
         </article>
       </section>
 
@@ -104,6 +152,11 @@ export default async function LandingPage() {
           <div className="eyebrow">Operate</div>
           <h3 style={{ margin: 0 }}>Run daily execution from one layer</h3>
           <p className="muted">Track activity, use AI apps, and monitor executive KPIs in a unified command surface.</p>
+        </article>
+        <article className="card stack">
+          <div className="eyebrow">Optimize</div>
+          <h3 style={{ margin: 0 }}>Improve continuously with visibility</h3>
+          <p className="muted">Use run outcomes, KPIs, and recommendation evidence to refine systems over time.</p>
         </article>
       </section>
     </div>

@@ -23,12 +23,15 @@ export default async function ActivityPage() {
     .eq("company_id", context.company.id)
     .order("started_at", { ascending: false })
     .limit(50);
+  const completed = (runs || []).filter((run) => run.status === "completed").length;
+  const failed = (runs || []).filter((run) => run.status === "failed").length;
 
   return (
     <div className="shell-grid">
       <PageHeader
         eyebrow="Activity"
         title="Execution timeline and run outcomes"
+        description="Inspect run-level operational telemetry, failures, and output traces."
         badges={
           <>
             <span className="badge info">Workflow activity center</span>
@@ -36,6 +39,24 @@ export default async function ActivityPage() {
           </>
         }
       />
+
+      <section className="metric-grid">
+        <div className="metric-card">
+          <div className="metric-label">Recent runs</div>
+          <div className="metric-value">{runs?.length || 0}</div>
+          <div className="muted">Latest execution records</div>
+        </div>
+        <div className="metric-card">
+          <div className="metric-label">Completed</div>
+          <div className="metric-value">{completed}</div>
+          <div className="muted">Successful executions</div>
+        </div>
+        <div className="metric-card">
+          <div className="metric-label">Failed</div>
+          <div className="metric-value">{failed}</div>
+          <div className="muted">Runs requiring investigation</div>
+        </div>
+      </section>
 
       <TableShell title="Recent workflow runs" subtitle="Execution history">
         <table>

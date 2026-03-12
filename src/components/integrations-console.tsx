@@ -45,27 +45,45 @@ export function IntegrationsConsole({ initialRows }: { initialRows: IntegrationR
 
   return (
     <div className="shell-grid">
-      <section className="card stack">
-        <div className="section-heading">
-          <div className="eyebrow">Connect integration</div>
-          <h2 style={{ margin: 0 }}>Integration controls</h2>
-        </div>
-        <div className="grid two">
-          <div className="field">
-            <label htmlFor="provider">Provider</label>
-            <select id="provider" value={provider} onChange={(event) => setProvider(event.target.value)}>
-              {DEFAULT_PROVIDERS.map((item) => (
-                <option key={item}>{item}</option>
-              ))}
-            </select>
+      <section className="split">
+        <article className="card stack">
+          <div className="section-heading">
+            <div className="eyebrow">Connect integration</div>
+            <h2 style={{ margin: 0 }}>Integration controls</h2>
           </div>
-        </div>
-        {error ? <Notice tone="error">{error}</Notice> : null}
-        <div>
-          <button disabled={pending} onClick={connectProvider}>
-            {pending ? "Connecting..." : "Connect"}
-          </button>
-        </div>
+          <div className="grid two">
+            <div className="field">
+              <label htmlFor="provider">Provider</label>
+              <select id="provider" value={provider} onChange={(event) => setProvider(event.target.value)}>
+                {DEFAULT_PROVIDERS.map((item) => (
+                  <option key={item}>{item}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          {error ? <Notice tone="error">{error}</Notice> : null}
+          <div>
+            <button disabled={pending} onClick={connectProvider}>
+              {pending ? "Connecting..." : "Connect"}
+            </button>
+          </div>
+        </article>
+
+        <article className="card stack card-dark">
+          <div className="section-heading">
+            <div className="eyebrow">Connection strategy</div>
+            <h2 style={{ margin: 0 }}>Activate providers in phased order</h2>
+          </div>
+          <ul className="list-tight">
+            <li>Start with CRM and Email to improve lead follow-up speed.</li>
+            <li>Add Helpdesk and Project tools for delivery visibility.</li>
+            <li>Enable Billing and Accounting for revenue telemetry.</li>
+          </ul>
+          <div className="packet-block">
+            <div className="eyebrow">Connected providers</div>
+            <div className="muted">{rows.filter((row) => row.status === "connected").length} active connections</div>
+          </div>
+        </article>
       </section>
 
       <TableShell title="Status overview" subtitle="Current integrations">

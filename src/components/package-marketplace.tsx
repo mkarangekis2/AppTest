@@ -32,13 +32,25 @@ export function PackageMarketplace({ packages }: { packages: PackageDefinition[]
 
   return (
     <div className="shell-grid">
-      {error ? <Notice tone="error">{error}</Notice> : null}
+      <section className="card stack">
+        <div className="section-heading">
+          <div className="eyebrow">Package rollout</div>
+          <h2 style={{ margin: 0 }}>Install pre-bundled systems by business objective</h2>
+        </div>
+        <div className="badge-row">
+          <span className="badge info">{packages.length} launch packages</span>
+          <span className="badge ghost">{Object.values(installed).filter(Boolean).length} installed this session</span>
+        </div>
+        {error ? <Notice tone="error">{error}</Notice> : null}
+      </section>
+
       <section className="grid two">
         {!packages.length ? <EmptyState title="No packages available" detail="Package catalog is currently empty." /> : null}
         {packages.map((pkg) => (
           <article key={pkg.slug} className="card stack">
             <div className="badge-row">
               <span className="badge">{pkg.category}</span>
+              <span className="badge ghost">{pkg.setupEstimate}</span>
               {installed[pkg.slug] ? <span className="badge info">Installed</span> : null}
             </div>
             <h3 style={{ margin: 0 }}>{pkg.name}</h3>
@@ -63,7 +75,25 @@ export function PackageMarketplace({ packages }: { packages: PackageDefinition[]
                 ))}
               </ul>
             </div>
-            <div className="muted">Setup estimate: {pkg.setupEstimate}</div>
+            <div className="grid two">
+              <div className="packet-block">
+                <div className="eyebrow">Implementation sequence</div>
+                <ul className="list-tight">
+                  <li>Install package modules in order</li>
+                  <li>Connect required integrations</li>
+                  <li>Activate default workflows</li>
+                  <li>Review KPI impact after launch</li>
+                </ul>
+              </div>
+              <div className="packet-block">
+                <div className="eyebrow">Execution notes</div>
+                <ul className="list-tight">
+                  <li>Bundle designed for coordinated rollout</li>
+                  <li>Use reports page for KPI validation</li>
+                  <li>Adjust sequencing by team capacity</li>
+                </ul>
+              </div>
+            </div>
             <div>
               <button
                 disabled={Boolean(installed[pkg.slug]) || pendingSlug === pkg.slug}

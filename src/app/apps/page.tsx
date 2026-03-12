@@ -56,6 +56,7 @@ export default async function AppsPage() {
           <>
             <span className="badge info">AI Apps</span>
             <span className="badge ghost">Provider-agnostic runtime</span>
+            <span className="badge success">{(apps as AppSummary[] | null)?.length || 0} configured</span>
             <span className="badge">{company.name}</span>
           </>
         }

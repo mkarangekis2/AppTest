@@ -99,16 +99,22 @@ export function OnboardingWizard() {
         <div className="badge-row">
           <span className="badge info">Step {step} of 3</span>
           <span className="badge">Business diagnostic</span>
+          <span className="badge ghost">Adaptive onboarding</span>
         </div>
         <div className="section-heading">
           <div className="eyebrow">Onboarding</div>
           <h1 className="display-title" style={{ margin: 0 }}>
-            Analyze your operations profile
+            Build your operational baseline
           </h1>
         </div>
         <p className="lede">
-          Complete the diagnostic so the platform can generate explainable analysis and prioritized system recommendations.
+          Complete this diagnostic to generate explainable analysis outputs and prioritized system recommendations.
         </p>
+        <div className="grid three">
+          <StepCard index={1} title="Business profile" detail="Who you are and what you sell" active={step === 1} complete={step > 1} />
+          <StepCard index={2} title="Operating maturity" detail="Volume and complexity baseline" active={step === 2} complete={step > 2} />
+          <StepCard index={3} title="Priority mapping" detail="Pain points and growth targets" active={step === 3} complete={false} />
+        </div>
       </section>
 
       {step === 1 ? (
@@ -194,54 +200,123 @@ export function OnboardingWizard() {
       ) : null}
 
       {step === 3 ? (
-        <section className="card stack">
-          <div className="section-heading">
-            <div className="eyebrow">Pain points and growth goals</div>
-            <h2 style={{ margin: 0 }}>Priorities for recommendations</h2>
+        <section className="split">
+          <div className="card stack">
+            <div className="section-heading">
+              <div className="eyebrow">Pain points and growth goals</div>
+              <h2 style={{ margin: 0 }}>Priorities for recommendations</h2>
+            </div>
+            <div className="grid two">
+              <div className="packet-block">
+                <div className="eyebrow">Pain points</div>
+                <div className="stack tight">
+                  {PAIN_POINTS.map((item) => (
+                    <label key={item.key} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                      <input
+                        type="checkbox"
+                        checked={painPoints.includes(item.key)}
+                        onChange={() => toggle(painPoints, item.key, setPainPoints)}
+                      />
+                      <span>{item.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="packet-block">
+                <div className="eyebrow">Growth goals</div>
+                <div className="stack tight">
+                  {GROWTH_GOALS.map((item) => (
+                    <label key={item.key} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                      <input
+                        type="checkbox"
+                        checked={growthGoals.includes(item.key)}
+                        onChange={() => toggle(growthGoals, item.key, setGrowthGoals)}
+                      />
+                      <span>{item.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+            {error ? <Notice tone="error">{error}</Notice> : null}
+            <div className="action-row">
+              <button className="secondary" onClick={() => setStep(2)}>
+                Back
+              </button>
+              <button disabled={pending || !companyName.trim()} onClick={submit}>
+                {pending ? "Saving..." : "Generate Analysis"}
+              </button>
+            </div>
           </div>
-          <div className="grid two">
+
+          <aside className="card stack">
+            <div className="section-heading">
+              <div className="eyebrow">Submission preview</div>
+              <h3 style={{ margin: 0 }}>Diagnostic summary</h3>
+            </div>
             <div className="packet-block">
-              <div className="eyebrow">Pain points</div>
-              <div className="stack tight">
-                {PAIN_POINTS.map((item) => (
-                  <label key={item.key} style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                    <input
-                      type="checkbox"
-                      checked={painPoints.includes(item.key)}
-                      onChange={() => toggle(painPoints, item.key, setPainPoints)}
-                    />
-                    <span>{item.label}</span>
-                  </label>
-                ))}
+              <div className="eyebrow">Company</div>
+              <div>{companyName || "Not set"}</div>
+              <div className="muted">
+                {industry} · {teamSize} team
               </div>
             </div>
             <div className="packet-block">
-              <div className="eyebrow">Growth goals</div>
-              <div className="stack tight">
-                {GROWTH_GOALS.map((item) => (
-                  <label key={item.key} style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                    <input
-                      type="checkbox"
-                      checked={growthGoals.includes(item.key)}
-                      onChange={() => toggle(growthGoals, item.key, setGrowthGoals)}
-                    />
-                    <span>{item.label}</span>
-                  </label>
-                ))}
-              </div>
+              <div className="eyebrow">Volumes</div>
+              <div className="muted">Lead volume: {leadVolume}/month</div>
+              <div className="muted">Support volume: {supportVolume}/month</div>
             </div>
-          </div>
-          {error ? <Notice tone="error">{error}</Notice> : null}
-          <div className="action-row">
-            <button className="secondary" onClick={() => setStep(2)}>
-              Back
-            </button>
-            <button disabled={pending || !companyName.trim()} onClick={submit}>
-              {pending ? "Saving..." : "Generate Analysis"}
-            </button>
-          </div>
+            <div className="packet-block">
+              <div className="eyebrow">Selected pain points</div>
+              {painPoints.length ? (
+                <ul className="list-tight">
+                  {painPoints.map((point) => (
+                    <li key={point}>{point}</li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="muted">None selected yet</div>
+              )}
+            </div>
+            <div className="packet-block">
+              <div className="eyebrow">Selected growth goals</div>
+              {growthGoals.length ? (
+                <ul className="list-tight">
+                  {growthGoals.map((goal) => (
+                    <li key={goal}>{goal}</li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="muted">None selected yet</div>
+              )}
+            </div>
+          </aside>
         </section>
       ) : null}
+    </div>
+  );
+}
+
+function StepCard({
+  index,
+  title,
+  detail,
+  active,
+  complete
+}: {
+  index: number;
+  title: string;
+  detail: string;
+  active: boolean;
+  complete: boolean;
+}) {
+  return (
+    <div className={`timeline-item ${active ? "command-card active" : ""}`}>
+      <div className="badge-row">
+        <span className={`badge ${complete ? "success" : active ? "info" : "ghost"}`}>Step {index}</span>
+      </div>
+      <strong>{title}</strong>
+      <span className="muted">{detail}</span>
     </div>
   );
 }

@@ -38,6 +38,7 @@ export default async function WorkflowsPage() {
       <PageHeader
         eyebrow="Workflows"
         title="Build and execute operational automation logic"
+        description="Create deterministic trigger-condition-action workflows and run them under execution controls."
         badges={
           <>
             <span className="badge info">Workflow engine</span>
