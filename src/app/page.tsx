@@ -30,6 +30,20 @@ export default async function LandingPage() {
             Open App Studio
           </Link>
         </div>
+        <div className="hero-metrics">
+          <div className="hero-metric">
+            <span className="metric-label">Operational domains</span>
+            <strong>12+</strong>
+          </div>
+          <div className="hero-metric">
+            <span className="metric-label">Launch module library</span>
+            <strong>50 Systems</strong>
+          </div>
+          <div className="hero-metric">
+            <span className="metric-label">AI app runtime</span>
+            <strong>OpenAI + Anthropic</strong>
+          </div>
+        </div>
       </section>
 
       <section className="grid three">
@@ -72,6 +86,24 @@ export default async function LandingPage() {
             Every screen maps to this operating cycle, so teams can move from diagnosis to execution with measurable
             improvement and consistent governance.
           </p>
+        </article>
+      </section>
+
+      <section className="grid three">
+        <article className="card stack">
+          <div className="eyebrow">Onboard</div>
+          <h3 style={{ margin: 0 }}>Model your operating reality</h3>
+          <p className="muted">Capture constraints, service complexity, workflow maturity, and growth goals.</p>
+        </article>
+        <article className="card stack">
+          <div className="eyebrow">Install</div>
+          <h3 style={{ margin: 0 }}>Deploy systems and workflows</h3>
+          <p className="muted">Install modules and packages with built-in workflows, tracking, and governance.</p>
+        </article>
+        <article className="card stack">
+          <div className="eyebrow">Operate</div>
+          <h3 style={{ margin: 0 }}>Run daily execution from one layer</h3>
+          <p className="muted">Track activity, use AI apps, and monitor executive KPIs in a unified command surface.</p>
         </article>
       </section>
     </div>

@@ -200,6 +200,10 @@ p {
   gap: 16px;
 }
 
+.context-bar {
+  padding: 0 4px;
+}
+
 .topbar,
 .card,
 .panel,
@@ -252,6 +256,12 @@ p {
   min-width: 210px;
 }
 
+.command-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .topnav {
   display: flex;
   align-items: center;
@@ -280,6 +290,18 @@ p {
   width: min(1320px, calc(100vw - 24px));
   margin: 0 auto;
   padding: 0 0 26px;
+  animation: page-fade 180ms ease-out;
+}
+
+@keyframes page-fade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .shell-grid {
@@ -339,6 +361,26 @@ p {
 
 .hero-prime {
   border-color: rgba(37, 99, 235, 0.2);
+}
+
+.hero-metrics {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+
+.hero-metric {
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.8);
+  display: grid;
+  gap: 2px;
+}
+
+.hero-metric strong {
+  font-family: var(--heading);
+  font-size: 0.92rem;
 }
 
 .mission-hero {
@@ -494,6 +536,21 @@ button {
 
 .button.compact {
   padding: 8px 13px;
+}
+
+.command-launch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kbd {
+  font-size: 0.64rem;
+  padding: 2px 6px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.65);
+  color: var(--muted);
 }
 
 .button:focus-visible,
@@ -768,6 +825,92 @@ button.danger {
   background: rgba(255, 255, 255, 0.78);
 }
 
+.breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.78rem;
+  padding: 0 8px;
+}
+
+.crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.crumb-link {
+  color: var(--muted);
+}
+
+.crumb-link:hover {
+  color: var(--text);
+}
+
+.crumb-current {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.crumb-sep {
+  opacity: 0.55;
+}
+
+.command-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  background: rgba(15, 23, 42, 0.42);
+  display: grid;
+  place-items: start center;
+  padding-top: 11vh;
+}
+
+.command-modal {
+  width: min(720px, calc(100vw - 24px));
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 250, 255, 0.96));
+  box-shadow: var(--shadow-strong);
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.command-results {
+  max-height: 360px;
+  overflow: auto;
+  display: grid;
+  gap: 6px;
+}
+
+.command-result {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.86rem;
+  box-shadow: none;
+}
+
+.command-result:hover {
+  border-color: rgba(37, 99, 235, 0.3);
+  background: rgba(37, 99, 235, 0.07);
+}
+
+.command-hint {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
 .empty-title {
   font-weight: 700;
   color: var(--text);
@@ -901,6 +1044,11 @@ button.danger {
     display: none;
   }
 
+  .command-row {
+    width: 100%;
+    justify-content: stretch;
+  }
+
   .topnav,
   .action-row,
   .hero-actions,
@@ -919,6 +1067,14 @@ button.danger {
 
   table {
     min-width: 500px;
+  }
+
+  .command-overlay {
+    padding-top: 6vh;
+  }
+
+  .command-modal {
+    width: calc(100vw - 16px);
   }
 }
 

@@ -6,6 +6,8 @@ import "./globals.css";
 import { getOptionalUser } from "@/lib/auth";
 import { SignOutButton } from "@/components/sign-out-button";
 import { AppNavigation } from "@/components/app-navigation";
+import { CommandPalette } from "@/components/ui/command-palette";
+import { AppBreadcrumbs } from "@/components/ui/breadcrumbs";
 
 const headingFont = Sora({
   subsets: ["latin"],
@@ -42,6 +44,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     { href: "/reports", label: "Reports" },
     { href: "/integrations", label: "Integrations" },
     { href: "/settings", label: "Settings" }
+  ] as const;
+  const quickItems = [
+    { href: "/dashboard", label: "Dashboard", hint: "Overview and KPI command center" },
+    { href: "/onboarding", label: "Onboarding", hint: "Run business diagnostic" },
+    { href: "/analysis", label: "Analysis", hint: "Review operational analysis" },
+    { href: "/recommendations", label: "Recommendations", hint: "See install recommendations" },
+    { href: "/apps", label: "AI Apps", hint: "Build and run internal AI apps" },
+    { href: "/workflows", label: "Workflows", hint: "Manage automations" },
+    { href: "/activity", label: "Activity", hint: "Inspect execution timeline" },
+    { href: "/knowledge", label: "Knowledge", hint: "Search indexed docs" },
+    { href: "/customers", label: "Customers", hint: "View leads, clients, opportunities" },
+    { href: "/settings", label: "Settings", hint: "Company and AI configuration" }
   ] as const;
 
   return (
@@ -80,9 +94,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                     AI Apps
                   </Link>
                 </nav>
-                {user ? <SignOutButton /> : <Link className="button secondary compact" href="/login">Sign in</Link>}
+                <div className="command-row">
+                  <CommandPalette items={quickItems} />
+                  {user ? <SignOutButton /> : <Link className="button secondary compact" href="/login">Sign in</Link>}
+                </div>
               </div>
             </header>
+            <div className="context-bar">
+              <AppBreadcrumbs />
+            </div>
             <div className="shell">{children}</div>
           </main>
         </div>
