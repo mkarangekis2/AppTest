@@ -1,6 +1,8 @@
 import { requireUser } from "@/lib/auth";
 import { getLatestCompanyContext } from "@/lib/acg/context";
 import { SettingsConsole } from "@/components/settings-console";
+import { EmptyState, TableShell } from "@/components/ui/feedback";
+import { PageHeader } from "@/components/ui/page-header";
 
 export default async function SettingsPage() {
   const { supabase, user } = await requireUser();
@@ -10,7 +12,7 @@ export default async function SettingsPage() {
     return (
       <div className="shell-grid">
         <section className="card">
-          <div className="empty-state">Complete onboarding first to configure settings.</div>
+          <EmptyState title="Complete onboarding first" detail="Settings become available after workspace onboarding." />
         </section>
       </div>
     );
@@ -32,17 +34,11 @@ export default async function SettingsPage() {
 
   return (
     <div className="shell-grid">
-      <section className="hero card mission-hero">
-        <div className="badge-row">
-          <span className="badge info">Settings and entitlements</span>
-        </div>
-        <div className="section-heading">
-          <div className="eyebrow">Settings</div>
-          <h1 className="display-title" style={{ margin: 0 }}>
-            Company profile, AI behavior, and usage controls
-          </h1>
-        </div>
-      </section>
+      <PageHeader
+        eyebrow="Settings"
+        title="Company profile, AI behavior, and usage controls"
+        badges={<span className="badge info">Settings and entitlements</span>}
+      />
 
       <SettingsConsole initialCompanyName={context.company.name} initialWebsite={context.company.website || ""} />
 
@@ -60,43 +56,39 @@ export default async function SettingsPage() {
               <li>Started: {new Date(subscription.started_at).toLocaleDateString()}</li>
             </ul>
           ) : (
-            <div className="empty-state">No subscription record yet. Default entitlement model is active.</div>
+            <EmptyState title="No subscription record yet" detail="Default entitlement model is active." />
           )}
         </article>
-        <article className="card stack">
-          <div className="section-heading">
-            <div className="eyebrow">Usage</div>
-            <h2 style={{ margin: 0 }}>Tracked usage metrics</h2>
-          </div>
-          <div className="table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Metric</th>
-                  <th>Value</th>
-                  <th>Period</th>
-                </tr>
-              </thead>
-              <tbody>
-                {usage?.length ? (
-                  usage.map((row, index) => (
-                    <tr key={`${row.metric_key}-${row.created_at}-${index}`}>
-                      <td>{row.metric_key}</td>
-                      <td>{row.metric_value}</td>
-                      <td>
-                        {row.period_start} to {row.period_end}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={3}>No usage metrics yet.</td>
+        <TableShell title="Tracked usage metrics" subtitle="Usage">
+          <table>
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Value</th>
+                <th>Period</th>
+              </tr>
+            </thead>
+            <tbody>
+              {usage?.length ? (
+                usage.map((row, index) => (
+                  <tr key={`${row.metric_key}-${row.created_at}-${index}`}>
+                    <td>{row.metric_key}</td>
+                    <td>{row.metric_value}</td>
+                    <td>
+                      {row.period_start} to {row.period_end}
+                    </td>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </article>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={3}>
+                    <EmptyState title="No usage metrics yet" />
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </TableShell>
       </section>
     </div>
   );

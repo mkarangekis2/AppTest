@@ -1,6 +1,8 @@
 import { requireUser } from "@/lib/auth";
 import { getLatestCompanyContext } from "@/lib/acg/context";
 import { KnowledgeWorkspace } from "@/components/knowledge-workspace";
+import { EmptyState } from "@/components/ui/feedback";
+import { PageHeader } from "@/components/ui/page-header";
 
 export default async function KnowledgePage() {
   const { supabase, user } = await requireUser();
@@ -10,7 +12,7 @@ export default async function KnowledgePage() {
     return (
       <div className="shell-grid">
         <section className="card">
-          <div className="empty-state">Complete onboarding first to use the knowledge system.</div>
+          <EmptyState title="Complete onboarding first" detail="Knowledge indexing and retrieval are enabled after onboarding." />
         </section>
       </div>
     );
@@ -18,18 +20,16 @@ export default async function KnowledgePage() {
 
   return (
     <div className="shell-grid">
-      <section className="hero card mission-hero">
-        <div className="badge-row">
-          <span className="badge info">Knowledge system</span>
-          <span className="badge ghost">Phase 5 scaffold</span>
-        </div>
-        <div className="section-heading">
-          <div className="eyebrow">Knowledge</div>
-          <h1 className="display-title" style={{ margin: 0 }}>
-            Capture, index, and retrieve internal operational knowledge
-          </h1>
-        </div>
-      </section>
+      <PageHeader
+        eyebrow="Knowledge"
+        title="Capture, index, and retrieve internal operational knowledge"
+        badges={
+          <>
+            <span className="badge info">Knowledge system</span>
+            <span className="badge ghost">Semantic retrieval</span>
+          </>
+        }
+      />
       <KnowledgeWorkspace />
     </div>
   );

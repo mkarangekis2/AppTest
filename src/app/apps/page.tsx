@@ -3,6 +3,8 @@ import type { Route } from "next";
 import { requireUser } from "@/lib/auth";
 import { getPrimaryCompany } from "@/lib/acg/company";
 import { AiAppStudio } from "@/components/ai-app-studio";
+import { EmptyState } from "@/components/ui/feedback";
+import { PageHeader } from "@/components/ui/page-header";
 
 type AppSummary = {
   id: string;
@@ -24,16 +26,15 @@ export default async function AppsPage() {
     return (
       <div className="shell-grid">
         <section className="card stack">
-          <div className="section-heading">
-            <div className="eyebrow">AI Apps</div>
-            <h1 style={{ margin: 0 }}>Complete onboarding first</h1>
-          </div>
-          <p className="muted">AI Apps are scoped to a company workspace. Initialize your company profile to continue.</p>
-          <div>
-            <Link className="button" href={"/onboarding" as Route}>
-              Start onboarding
-            </Link>
-          </div>
+          <EmptyState
+            title="Complete onboarding first"
+            detail="AI Apps are scoped to a company workspace. Initialize your company profile to continue."
+            action={
+              <Link className="button" href={"/onboarding" as Route}>
+                Start onboarding
+              </Link>
+            }
+          />
         </section>
       </div>
     );
@@ -47,23 +48,18 @@ export default async function AppsPage() {
 
   return (
     <div className="shell-grid">
-      <section className="hero card mission-hero">
-        <div className="badge-row">
-          <span className="badge info">AI Apps</span>
-          <span className="badge ghost">Provider-agnostic runtime</span>
-          <span className="badge">{company.name}</span>
-        </div>
-        <div className="section-heading">
-          <div className="eyebrow">App studio</div>
-          <h1 className="display-title" style={{ margin: 0 }}>
-            Build internal AI apps your teams can run daily
-          </h1>
-        </div>
-        <p className="lede">
-          Define reusable AI app behavior with prompts and models, then execute prompts in a governed runtime with run
-          history and output inspection.
-        </p>
-      </section>
+      <PageHeader
+        eyebrow="App studio"
+        title="Build internal AI apps your teams can run daily"
+        description="Define reusable AI app behavior with prompts and models, then execute in a governed runtime with run history and output inspection."
+        badges={
+          <>
+            <span className="badge info">AI Apps</span>
+            <span className="badge ghost">Provider-agnostic runtime</span>
+            <span className="badge">{company.name}</span>
+          </>
+        }
+      />
 
       <AiAppStudio initialApps={(apps as AppSummary[]) || []} />
     </div>

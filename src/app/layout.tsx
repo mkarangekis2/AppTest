@@ -5,6 +5,7 @@ import { Fraunces, Manrope } from "next/font/google";
 import "./globals.css";
 import { getOptionalUser } from "@/lib/auth";
 import { SignOutButton } from "@/components/sign-out-button";
+import { AppNavigation } from "@/components/app-navigation";
 
 const headlineFont = Fraunces({
   subsets: ["latin"],
@@ -55,13 +56,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <strong>AI Operations Platform</strong>
               </div>
             </Link>
-            <nav className="sidebar-nav">
-              {nav.map((item) => (
-                <Link key={item.href} className="sidebar-link" href={item.href as Route}>
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
+            <AppNavigation items={nav} />
             <div className="sidebar-footer">
               <span className="badge info">Production-ready</span>
               <span className="badge ghost">AI-guided operations</span>

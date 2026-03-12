@@ -1,5 +1,7 @@
 import { requireUser } from "@/lib/auth";
 import { getLatestCompanyContext } from "@/lib/acg/context";
+import { EmptyState, TableShell } from "@/components/ui/feedback";
+import { PageHeader } from "@/components/ui/page-header";
 
 export default async function ActivityPage() {
   const { supabase, user } = await requireUser();
@@ -9,7 +11,7 @@ export default async function ActivityPage() {
     return (
       <div className="shell-grid">
         <section className="card">
-          <div className="empty-state">Complete onboarding first to view workflow activity.</div>
+          <EmptyState title="Complete onboarding first" detail="Workflow activity unlocks after workspace onboarding." />
         </section>
       </div>
     );
@@ -24,49 +26,51 @@ export default async function ActivityPage() {
 
   return (
     <div className="shell-grid">
-      <section className="hero card mission-hero">
-        <div className="badge-row">
-          <span className="badge info">Workflow activity center</span>
-          <span className="badge ghost">Phase 4 scaffold</span>
-        </div>
-        <div className="section-heading">
-          <div className="eyebrow">Activity</div>
-          <h1 className="display-title" style={{ margin: 0 }}>
-            Execution timeline and run outcomes
-          </h1>
-        </div>
-      </section>
+      <PageHeader
+        eyebrow="Activity"
+        title="Execution timeline and run outcomes"
+        badges={
+          <>
+            <span className="badge info">Workflow activity center</span>
+            <span className="badge ghost">Operations telemetry</span>
+          </>
+        }
+      />
 
-      <section className="card stack">
-        <div className="table">
-          <table>
-            <thead>
-              <tr>
-                <th>Started</th>
-                <th>Status</th>
-                <th>Input</th>
-                <th>Output</th>
-              </tr>
-            </thead>
-            <tbody>
-              {runs?.length ? (
-                runs.map((run) => (
-                  <tr key={run.id}>
-                    <td>{new Date(run.started_at).toLocaleString()}</td>
-                    <td>{run.status}</td>
-                    <td>{JSON.stringify(run.input_json)}</td>
-                    <td>{run.error_message ? run.error_message : JSON.stringify(run.output_json)}</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={4}>No workflow runs yet.</td>
+      <TableShell title="Recent workflow runs" subtitle="Execution history">
+        <table>
+          <thead>
+            <tr>
+              <th>Started</th>
+              <th>Status</th>
+              <th>Input</th>
+              <th>Output</th>
+            </tr>
+          </thead>
+          <tbody>
+            {runs?.length ? (
+              runs.map((run) => (
+                <tr key={run.id}>
+                  <td>{new Date(run.started_at).toLocaleString()}</td>
+                  <td>
+                    <span className={`badge ${run.status === "failed" ? "danger" : run.status === "running" ? "warning" : "success"}`}>
+                      {run.status}
+                    </span>
+                  </td>
+                  <td className="muted">{JSON.stringify(run.input_json)}</td>
+                  <td className="muted">{run.error_message ? run.error_message : JSON.stringify(run.output_json)}</td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={4}>
+                  <EmptyState title="No workflow runs yet" detail="Run a workflow to start collecting execution history." />
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </TableShell>
     </div>
   );
 }

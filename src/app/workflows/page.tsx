@@ -1,6 +1,8 @@
 import { requireUser } from "@/lib/auth";
 import { getLatestCompanyContext } from "@/lib/acg/context";
 import { WorkflowCenter } from "@/components/workflow-center";
+import { EmptyState } from "@/components/ui/feedback";
+import { PageHeader } from "@/components/ui/page-header";
 
 type WorkflowRow = {
   id: string;
@@ -19,7 +21,7 @@ export default async function WorkflowsPage() {
     return (
       <div className="shell-grid">
         <section className="card">
-          <div className="empty-state">Complete onboarding first to create workflows.</div>
+          <EmptyState title="Complete onboarding first" detail="Workflow creation requires an active company profile." />
         </section>
       </div>
     );
@@ -33,18 +35,16 @@ export default async function WorkflowsPage() {
 
   return (
     <div className="shell-grid">
-      <section className="hero card mission-hero">
-        <div className="badge-row">
-          <span className="badge info">Workflow engine</span>
-          <span className="badge ghost">Phase 4 scaffold</span>
-        </div>
-        <div className="section-heading">
-          <div className="eyebrow">Workflows</div>
-          <h1 className="display-title" style={{ margin: 0 }}>
-            Build and execute operational automation logic
-          </h1>
-        </div>
-      </section>
+      <PageHeader
+        eyebrow="Workflows"
+        title="Build and execute operational automation logic"
+        badges={
+          <>
+            <span className="badge info">Workflow engine</span>
+            <span className="badge ghost">Trigger → Condition → Action</span>
+          </>
+        }
+      />
       <WorkflowCenter initialWorkflows={(workflows as WorkflowRow[]) || []} />
     </div>
   );

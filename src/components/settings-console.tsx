@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Notice } from "@/components/ui/feedback";
 
 type SettingsPayload = {
   companyName: string;
@@ -98,8 +99,8 @@ export function SettingsConsole({
           </select>
         </div>
       </div>
-      {error ? <div className="badge danger">{error}</div> : null}
-      {saved ? <div className="badge info">Settings saved.</div> : null}
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {saved ? <Notice tone="success">Settings saved.</Notice> : null}
       <div>
         <button disabled={pending} onClick={save}>
           {pending ? "Saving..." : "Save settings"}

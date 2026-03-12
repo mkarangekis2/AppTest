@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { ModuleDefinition } from "@/lib/acg/types";
+import { EmptyState, Notice } from "@/components/ui/feedback";
 
 export function ModuleMarketplace({ modules }: { modules: ModuleDefinition[] }) {
   const [query, setQuery] = useState("");
@@ -54,10 +55,11 @@ export function ModuleMarketplace({ modules }: { modules: ModuleDefinition[] }) 
             placeholder="Search by category, problem solved, or module name"
           />
         </div>
-        {error ? <div className="badge danger">{error}</div> : null}
+        {error ? <Notice tone="error">{error}</Notice> : null}
       </section>
 
       <section className="grid two">
+        {!filtered.length ? <EmptyState title="No modules match this query" detail="Try a broader keyword or clear the filter." /> : null}
         {filtered.map((moduleDef) => (
           <article key={moduleDef.slug} className="card stack">
             <div className="badge-row">

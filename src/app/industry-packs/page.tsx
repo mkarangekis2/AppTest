@@ -1,23 +1,22 @@
 import { requireUser } from "@/lib/auth";
 import { INDUSTRY_PACK_CATALOG } from "@/config/industry-packs";
+import { PageHeader } from "@/components/ui/page-header";
 
 export default async function IndustryPacksPage() {
   await requireUser();
 
   return (
     <div className="shell-grid">
-      <section className="hero card mission-hero">
-        <div className="badge-row">
-          <span className="badge info">Industry packs</span>
-          <span className="badge ghost">{INDUSTRY_PACK_CATALOG.length} vertical presets</span>
-        </div>
-        <div className="section-heading">
-          <div className="eyebrow">Vertical acceleration</div>
-          <h1 className="display-title" style={{ margin: 0 }}>
-            Preconfigured module stacks and KPI presets by industry
-          </h1>
-        </div>
-      </section>
+      <PageHeader
+        eyebrow="Vertical acceleration"
+        title="Preconfigured module stacks and KPI presets by industry"
+        badges={
+          <>
+            <span className="badge info">Industry packs</span>
+            <span className="badge ghost">{INDUSTRY_PACK_CATALOG.length} vertical presets</span>
+          </>
+        }
+      />
 
       <section className="grid two">
         {INDUSTRY_PACK_CATALOG.map((pack) => (

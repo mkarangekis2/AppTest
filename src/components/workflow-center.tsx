@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { EmptyState, Notice } from "@/components/ui/feedback";
 
 type Workflow = {
   id: string;
@@ -93,7 +94,7 @@ export function WorkflowCenter({ initialWorkflows }: { initialWorkflows: Workflo
             </select>
           </div>
         </div>
-        {error ? <div className="badge danger">{error}</div> : null}
+        {error ? <Notice tone="error">{error}</Notice> : null}
         <div>
           <button disabled={!name.trim() || pending !== null} onClick={createWorkflow}>
             {pending === "create" ? "Creating..." : "Create workflow"}
@@ -118,7 +119,7 @@ export function WorkflowCenter({ initialWorkflows }: { initialWorkflows: Workflo
             </div>
           </article>
         ))}
-        {!workflows.length ? <div className="empty-state">No workflows yet. Create your first workflow.</div> : null}
+        {!workflows.length ? <EmptyState title="No workflows yet" detail="Create your first workflow to activate automation." /> : null}
       </section>
     </div>
   );

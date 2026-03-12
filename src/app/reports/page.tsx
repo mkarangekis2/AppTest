@@ -1,6 +1,8 @@
 import { requireUser } from "@/lib/auth";
 import { getLatestCompanyContext } from "@/lib/acg/context";
 import { KpiGrid } from "@/components/kpi-grid";
+import { EmptyState } from "@/components/ui/feedback";
+import { PageHeader } from "@/components/ui/page-header";
 
 export default async function ReportsPage() {
   const { supabase, user } = await requireUser();
@@ -10,7 +12,7 @@ export default async function ReportsPage() {
     return (
       <div className="shell-grid">
         <section className="card">
-          <div className="empty-state">Complete onboarding first to view executive reporting.</div>
+          <EmptyState title="Complete onboarding first" detail="Executive reporting is available after onboarding." />
         </section>
       </div>
     );
@@ -32,18 +34,16 @@ export default async function ReportsPage() {
 
   return (
     <div className="shell-grid">
-      <section className="hero card mission-hero">
-        <div className="badge-row">
-          <span className="badge info">Executive dashboard</span>
-          <span className="badge ghost">Phase 6 scaffold</span>
-        </div>
-        <div className="section-heading">
-          <div className="eyebrow">Reports</div>
-          <h1 className="display-title" style={{ margin: 0 }}>
-            Operational health and revenue visibility
-          </h1>
-        </div>
-      </section>
+      <PageHeader
+        eyebrow="Reports"
+        title="Operational health and revenue visibility"
+        badges={
+          <>
+            <span className="badge info">Executive dashboard</span>
+            <span className="badge ghost">KPI command view</span>
+          </>
+        }
+      />
 
       <KpiGrid
         items={[

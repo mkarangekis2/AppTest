@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { PackageDefinition } from "@/lib/acg/types";
+import { EmptyState, Notice } from "@/components/ui/feedback";
 
 export function PackageMarketplace({ packages }: { packages: PackageDefinition[] }) {
   const [pendingSlug, setPendingSlug] = useState<string | null>(null);
@@ -31,8 +32,9 @@ export function PackageMarketplace({ packages }: { packages: PackageDefinition[]
 
   return (
     <div className="shell-grid">
-      {error ? <div className="badge danger">{error}</div> : null}
+      {error ? <Notice tone="error">{error}</Notice> : null}
       <section className="grid two">
+        {!packages.length ? <EmptyState title="No packages available" detail="Package catalog is currently empty." /> : null}
         {packages.map((pkg) => (
           <article key={pkg.slug} className="card stack">
             <div className="badge-row">

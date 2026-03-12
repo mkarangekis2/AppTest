@@ -1,5 +1,7 @@
 import { requireUser } from "@/lib/auth";
 import { getLatestCompanyContext } from "@/lib/acg/context";
+import { EmptyState, TableShell } from "@/components/ui/feedback";
+import { PageHeader } from "@/components/ui/page-header";
 
 export default async function CustomersPage() {
   const { supabase, user } = await requireUser();
@@ -9,7 +11,7 @@ export default async function CustomersPage() {
     return (
       <div className="shell-grid">
         <section className="card">
-          <div className="empty-state">Complete onboarding first to view customers and leads.</div>
+          <EmptyState title="Complete onboarding first" detail="Customer and pipeline views unlock after onboarding." />
         </section>
       </div>
     );
@@ -42,125 +44,111 @@ export default async function CustomersPage() {
 
   return (
     <div className="shell-grid">
-      <section className="hero card mission-hero">
-        <div className="badge-row">
-          <span className="badge info">Customer operations view</span>
-          <span className="badge ghost">Phase 6 scaffold</span>
-        </div>
-        <div className="section-heading">
-          <div className="eyebrow">Customers</div>
-          <h1 className="display-title" style={{ margin: 0 }}>
-            Leads, opportunities, and client health in one surface
-          </h1>
-        </div>
-      </section>
+      <PageHeader
+        eyebrow="Customers"
+        title="Leads, opportunities, and client health in one surface"
+        badges={
+          <>
+            <span className="badge info">Customer operations view</span>
+            <span className="badge ghost">Pipeline visibility</span>
+          </>
+        }
+      />
 
       <section className="grid two">
-        <article className="card stack">
-          <div className="section-heading">
-            <div className="eyebrow">Leads</div>
-            <h2 style={{ margin: 0 }}>Recent inbound prospects</h2>
-          </div>
-          <div className="table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Company</th>
-                  <th>Status</th>
-                  <th>Score</th>
-                </tr>
-              </thead>
-              <tbody>
-                {leads.length ? (
-                  leads.map((lead) => (
-                    <tr key={lead.id}>
-                      <td>{[lead.first_name, lead.last_name].filter(Boolean).join(" ") || "Unknown"}</td>
-                      <td>{lead.company_name || "-"}</td>
-                      <td>{lead.status}</td>
-                      <td>{lead.score}</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4}>No leads yet.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </article>
-
-        <article className="card stack">
-          <div className="section-heading">
-            <div className="eyebrow">Clients</div>
-            <h2 style={{ margin: 0 }}>Account status and churn signals</h2>
-          </div>
-          <div className="table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Segment</th>
-                  <th>Status</th>
-                  <th>Churn risk</th>
-                </tr>
-              </thead>
-              <tbody>
-                {clients.length ? (
-                  clients.map((client) => (
-                    <tr key={client.id}>
-                      <td>{client.name}</td>
-                      <td>{client.segment || "-"}</td>
-                      <td>{client.status}</td>
-                      <td>{client.churn_risk}</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4}>No clients yet.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </article>
-      </section>
-
-      <section className="card stack">
-        <div className="section-heading">
-          <div className="eyebrow">Opportunities</div>
-          <h2 style={{ margin: 0 }}>Pipeline risk and value</h2>
-        </div>
-        <div className="table">
+        <TableShell title="Recent inbound prospects" subtitle="Leads">
           <table>
             <thead>
               <tr>
-                <th>Stage</th>
-                <th>Value</th>
-                <th>Close probability</th>
-                <th>Risk</th>
+                <th>Name</th>
+                <th>Company</th>
+                <th>Status</th>
+                <th>Score</th>
               </tr>
             </thead>
             <tbody>
-              {opportunities.length ? (
-                opportunities.map((opportunity) => (
-                  <tr key={opportunity.id}>
-                    <td>{opportunity.stage}</td>
-                    <td>${Number(opportunity.value || 0).toLocaleString()}</td>
-                    <td>{opportunity.close_probability}%</td>
-                    <td>{opportunity.risk_level}</td>
+              {leads.length ? (
+                leads.map((lead) => (
+                  <tr key={lead.id}>
+                    <td>{[lead.first_name, lead.last_name].filter(Boolean).join(" ") || "Unknown"}</td>
+                    <td>{lead.company_name || "-"}</td>
+                    <td>{lead.status}</td>
+                    <td>{lead.score}</td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={4}>No opportunities yet.</td>
+                  <td colSpan={4}>
+                    <EmptyState title="No leads yet" />
+                  </td>
                 </tr>
               )}
             </tbody>
           </table>
-        </div>
+        </TableShell>
+
+        <TableShell title="Account status and churn signals" subtitle="Clients">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Segment</th>
+                <th>Status</th>
+                <th>Churn risk</th>
+              </tr>
+            </thead>
+            <tbody>
+              {clients.length ? (
+                clients.map((client) => (
+                  <tr key={client.id}>
+                    <td>{client.name}</td>
+                    <td>{client.segment || "-"}</td>
+                    <td>{client.status}</td>
+                    <td>{client.churn_risk}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={4}>
+                    <EmptyState title="No clients yet" />
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </TableShell>
       </section>
+
+      <TableShell title="Pipeline risk and value" subtitle="Opportunities">
+        <table>
+          <thead>
+            <tr>
+              <th>Stage</th>
+              <th>Value</th>
+              <th>Close probability</th>
+              <th>Risk</th>
+            </tr>
+          </thead>
+          <tbody>
+            {opportunities.length ? (
+              opportunities.map((opportunity) => (
+                <tr key={opportunity.id}>
+                  <td>{opportunity.stage}</td>
+                  <td>${Number(opportunity.value || 0).toLocaleString()}</td>
+                  <td>{opportunity.close_probability}%</td>
+                  <td>{opportunity.risk_level}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={4}>
+                  <EmptyState title="No opportunities yet" />
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </TableShell>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { EmptyState, Notice } from "@/components/ui/feedback";
 
 type ResultRow = {
   id: string;
@@ -111,8 +112,8 @@ export function KnowledgeWorkspace() {
             {pending === "search" ? "Searching..." : "Search"}
           </button>
         </div>
-        {error ? <div className="badge danger">{error}</div> : null}
-        {status ? <div className="badge info">{status}</div> : null}
+        {error ? <Notice tone="error">{error}</Notice> : null}
+        {status ? <Notice tone="info">{status}</Notice> : null}
         <div className="timeline-list">
           {results.length ? (
             results.map((row) => (
@@ -127,7 +128,7 @@ export function KnowledgeWorkspace() {
               </article>
             ))
           ) : (
-            <div className="empty-state">No search results yet.</div>
+            <EmptyState title="No search results yet" detail="Run a semantic query to retrieve indexed knowledge." />
           )}
         </div>
       </section>

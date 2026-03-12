@@ -3,6 +3,8 @@ import type { Route } from "next";
 import { requireUser } from "@/lib/auth";
 import { getLatestCompanyContext } from "@/lib/acg/context";
 import { generateRecommendations } from "@/services/recommendation-engine/engine";
+import { EmptyState } from "@/components/ui/feedback";
+import { PageHeader } from "@/components/ui/page-header";
 
 export default async function RecommendationsPage() {
   const { supabase, user } = await requireUser();
@@ -12,16 +14,15 @@ export default async function RecommendationsPage() {
     return (
       <div className="shell-grid">
         <section className="card stack">
-          <div className="section-heading">
-            <div className="eyebrow">Recommendations</div>
-            <h1 style={{ margin: 0 }}>No onboarding profile found</h1>
-          </div>
-          <p className="muted">Complete onboarding first to generate recommendation sets.</p>
-          <div>
-            <Link className="button" href={"/onboarding" as Route}>
-              Start onboarding
-            </Link>
-          </div>
+          <EmptyState
+            title="No onboarding profile found"
+            detail="Complete onboarding first to generate recommendation sets."
+            action={
+              <Link className="button" href={"/onboarding" as Route}>
+                Start onboarding
+              </Link>
+            }
+          />
         </section>
       </div>
     );
@@ -31,18 +32,16 @@ export default async function RecommendationsPage() {
 
   return (
     <div className="shell-grid">
-      <section className="hero card mission-hero">
-        <div className="badge-row">
-          <span className="badge info">Recommendation engine</span>
-          <span className="badge ghost">Config-driven and explainable</span>
-        </div>
-        <div className="section-heading">
-          <div className="eyebrow">Recommendations</div>
-          <h1 className="display-title" style={{ margin: 0 }}>
-            Recommended systems for {context.company.name}
-          </h1>
-        </div>
-      </section>
+      <PageHeader
+        eyebrow="Recommendations"
+        title={`Recommended systems for ${context.company.name}`}
+        badges={
+          <>
+            <span className="badge info">Recommendation engine</span>
+            <span className="badge ghost">Config-driven and explainable</span>
+          </>
+        }
+      />
 
       {items.length ? (
         <section className="grid two">
@@ -78,7 +77,7 @@ export default async function RecommendationsPage() {
         </section>
       ) : (
         <section className="card">
-          <div className="empty-state">No recommendations generated yet. Update onboarding answers and retry analysis.</div>
+          <EmptyState title="No recommendations generated yet" detail="Update onboarding answers and retry analysis." />
         </section>
       )}
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { EmptyState, Notice, TableShell } from "@/components/ui/feedback";
 
 const DEFAULT_PROVIDERS = ["CRM", "Helpdesk", "Email", "Billing", "Accounting", "Project Management"];
 
@@ -59,7 +60,7 @@ export function IntegrationsConsole({ initialRows }: { initialRows: IntegrationR
             </select>
           </div>
         </div>
-        {error ? <div className="badge danger">{error}</div> : null}
+        {error ? <Notice tone="error">{error}</Notice> : null}
         <div>
           <button disabled={pending} onClick={connectProvider}>
             {pending ? "Connecting..." : "Connect"}
@@ -67,40 +68,38 @@ export function IntegrationsConsole({ initialRows }: { initialRows: IntegrationR
         </div>
       </section>
 
-      <section className="card stack">
-        <div className="section-heading">
-          <div className="eyebrow">Current integrations</div>
-          <h2 style={{ margin: 0 }}>Status overview</h2>
-        </div>
-        <div className="table">
-          <table>
-            <thead>
-              <tr>
-                <th>Provider</th>
-                <th>Status</th>
-                <th>Connected</th>
-                <th>Updated</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.length ? (
-                rows.map((row) => (
-                  <tr key={row.id}>
-                    <td>{row.provider}</td>
-                    <td>{row.status}</td>
-                    <td>{row.connected_at ? new Date(row.connected_at).toLocaleString() : "-"}</td>
-                    <td>{new Date(row.updated_at).toLocaleString()}</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={4}>No integrations connected yet.</td>
+      <TableShell title="Status overview" subtitle="Current integrations">
+        <table>
+          <thead>
+            <tr>
+              <th>Provider</th>
+              <th>Status</th>
+              <th>Connected</th>
+              <th>Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length ? (
+              rows.map((row) => (
+                <tr key={row.id}>
+                  <td>{row.provider}</td>
+                  <td>
+                    <span className={`badge ${row.status === "connected" ? "success" : "warning"}`}>{row.status}</span>
+                  </td>
+                  <td>{row.connected_at ? new Date(row.connected_at).toLocaleString() : "-"}</td>
+                  <td>{new Date(row.updated_at).toLocaleString()}</td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={4}>
+                  <EmptyState title="No integrations connected yet" detail="Connect a provider to start workflow automation." />
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </TableShell>
     </div>
   );
 }

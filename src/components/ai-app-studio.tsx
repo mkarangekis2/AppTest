@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { EmptyState, Notice, SkeletonRows, TableShell } from "@/components/ui/feedback";
 
 type AppSummary = {
   id: string;
@@ -226,9 +227,9 @@ export function AiAppStudio({ initialApps }: Props) {
           </button>
         </div>
 
-        {error ? <div className="empty-state">{error}</div> : null}
+        {error ? <Notice tone="error">{error}</Notice> : null}
 
-        <div className="table">
+        <TableShell title="Recent app runs" subtitle="Run history">
           <table>
             <thead>
               <tr>
@@ -239,10 +240,16 @@ export function AiAppStudio({ initialApps }: Props) {
               </tr>
             </thead>
             <tbody>
-              {runs.length === 0 ? (
+              {loadingRuns ? (
                 <tr>
                   <td colSpan={4}>
-                    <div className="empty-state">No runs yet for this app.</div>
+                    <SkeletonRows rows={4} />
+                  </td>
+                </tr>
+              ) : runs.length === 0 ? (
+                <tr>
+                  <td colSpan={4}>
+                    <EmptyState title="No runs yet for this app" detail="Run a prompt to capture output and latency." />
                   </td>
                 </tr>
               ) : (
@@ -263,7 +270,7 @@ export function AiAppStudio({ initialApps }: Props) {
               )}
             </tbody>
           </table>
-        </div>
+        </TableShell>
       </section>
     </div>
   );

@@ -1,6 +1,8 @@
 import { requireUser } from "@/lib/auth";
 import { getLatestCompanyContext } from "@/lib/acg/context";
 import { IntegrationsConsole } from "@/components/integrations-console";
+import { EmptyState } from "@/components/ui/feedback";
+import { PageHeader } from "@/components/ui/page-header";
 
 type IntegrationRow = {
   id: string;
@@ -18,7 +20,7 @@ export default async function IntegrationsPage() {
     return (
       <div className="shell-grid">
         <section className="card">
-          <div className="empty-state">Complete onboarding first to configure integrations.</div>
+          <EmptyState title="Complete onboarding first" detail="Integrations can be configured after workspace onboarding." />
         </section>
       </div>
     );
@@ -32,18 +34,16 @@ export default async function IntegrationsPage() {
 
   return (
     <div className="shell-grid">
-      <section className="hero card mission-hero">
-        <div className="badge-row">
-          <span className="badge info">Integrations</span>
-          <span className="badge ghost">Connectivity and provider health</span>
-        </div>
-        <div className="section-heading">
-          <div className="eyebrow">Integrations</div>
-          <h1 className="display-title" style={{ margin: 0 }}>
-            Connect external systems to activate automation
-          </h1>
-        </div>
-      </section>
+      <PageHeader
+        eyebrow="Integrations"
+        title="Connect external systems to activate automation"
+        badges={
+          <>
+            <span className="badge info">Integrations</span>
+            <span className="badge ghost">Connectivity and provider health</span>
+          </>
+        }
+      />
       <IntegrationsConsole initialRows={(data || []) as IntegrationRow[]} />
     </div>
   );

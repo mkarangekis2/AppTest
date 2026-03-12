@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Route } from "next";
+import { Notice } from "@/components/ui/feedback";
 
 type Level = "low" | "medium" | "high";
 
@@ -230,7 +231,7 @@ export function OnboardingWizard() {
               </div>
             </div>
           </div>
-          {error ? <div className="badge danger">{error}</div> : null}
+          {error ? <Notice tone="error">{error}</Notice> : null}
           <div className="action-row">
             <button className="secondary" onClick={() => setStep(2)}>
               Back

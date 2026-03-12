@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { Notice } from "@/components/ui/feedback";
 
 export function LoginForm() {
   const router = useRouter();
@@ -71,7 +72,7 @@ export function LoginForm() {
           Sign in provides access to onboarding, analysis, recommendations, and operational dashboards.
         </div>
       </div>
-      {error ? <div className="muted">{error}</div> : null}
+      {error ? <Notice tone="error">{error}</Notice> : null}
       <button type="submit" disabled={pending}>
         {pending ? "Working..." : mode === "login" ? "Sign in" : "Create account"}
       </button>

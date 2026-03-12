@@ -3,6 +3,8 @@ import type { Route } from "next";
 import { requireUser } from "@/lib/auth";
 import { getLatestCompanyContext } from "@/lib/acg/context";
 import { generateBusinessAnalysis } from "@/services/business-analysis/engine";
+import { EmptyState } from "@/components/ui/feedback";
+import { PageHeader } from "@/components/ui/page-header";
 
 export default async function AnalysisPage() {
   const { supabase, user } = await requireUser();
@@ -12,16 +14,15 @@ export default async function AnalysisPage() {
     return (
       <div className="shell-grid">
         <section className="card stack">
-          <div className="section-heading">
-            <div className="eyebrow">Business analysis</div>
-            <h1 style={{ margin: 0 }}>No onboarding profile found</h1>
-          </div>
-          <p className="muted">Complete onboarding first to generate your initial operations analysis.</p>
-          <div>
-            <Link className="button" href={"/onboarding" as Route}>
-              Start onboarding
-            </Link>
-          </div>
+          <EmptyState
+            title="No onboarding profile found"
+            detail="Complete onboarding first to generate your initial operations analysis."
+            action={
+              <Link className="button" href={"/onboarding" as Route}>
+                Start onboarding
+              </Link>
+            }
+          />
         </section>
       </div>
     );
@@ -31,18 +32,12 @@ export default async function AnalysisPage() {
 
   return (
     <div className="shell-grid">
-      <section className="hero card mission-hero">
-        <div className="badge-row">
-          <span className="badge info">Business analysis report</span>
-        </div>
-        <div className="section-heading">
-          <div className="eyebrow">Analysis</div>
-          <h1 className="display-title" style={{ margin: 0 }}>
-            {context.company.name}
-          </h1>
-        </div>
-        <p className="lede">{analysis.summary}</p>
-      </section>
+      <PageHeader
+        eyebrow="Analysis"
+        title={context.company.name}
+        description={analysis.summary}
+        badges={<span className="badge info">Business analysis report</span>}
+      />
 
       <section className="metric-grid">
         <Metric label="Lead handling" value={analysis.scores.leadHandling} />
