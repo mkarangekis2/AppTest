@@ -69,15 +69,15 @@ export default async function DashboardPage() {
         </div>
         <div className="card stack">
           <div className="section-heading">
-            <div className="eyebrow">Legacy access</div>
-            <h2 style={{ margin: 0 }}>Training platform retained</h2>
+            <div className="eyebrow">AI app workspace</div>
+            <h2 style={{ margin: 0 }}>Operational AI apps for each team</h2>
           </div>
           <p className="muted">
-            Existing Ranger Medic evaluator workflows remain available while the ACG platform is rolled out.
+            Build internal apps for proposal drafting, support response generation, planning support, and reporting workflows.
           </p>
           <div>
-            <Link className="button secondary" href={"/legacy" as Route}>
-              Open legacy training dashboard
+            <Link className="button secondary" href={"/apps" as Route}>
+              Open AI Apps
             </Link>
           </div>
         </div>

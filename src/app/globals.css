@@ -91,9 +91,77 @@ p {
 }
 
 .shell {
-  width: min(1480px, calc(100vw - 32px));
-  margin: 12px auto 40px;
-  padding: 8px 0 20px;
+  width: min(1320px, calc(100vw - 24px));
+  margin: 0 auto;
+  padding: 0 0 26px;
+}
+
+.app-shell {
+  width: min(1600px, calc(100vw - 22px));
+  margin: 10px auto 24px;
+  display: grid;
+  gap: 14px;
+  align-items: start;
+  grid-template-columns: 270px minmax(0, 1fr);
+}
+
+.app-sidebar {
+  position: sticky;
+  top: 12px;
+  height: calc(100vh - 24px);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 18px 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(245, 250, 255, 0.85));
+  box-shadow: var(--shadow-soft);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 18px;
+}
+
+.app-main {
+  min-width: 0;
+  display: grid;
+  gap: 18px;
+}
+
+.sidebar-brand {
+  display: grid;
+  gap: 12px;
+  align-items: center;
+  grid-template-columns: auto minmax(0, 1fr);
+  padding: 6px 6px 10px;
+  border-bottom: 1px solid rgba(20, 42, 73, 0.1);
+}
+
+.sidebar-nav {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.sidebar-link {
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 9px 10px;
+  color: var(--muted-strong);
+  font-size: 0.92rem;
+  font-weight: 600;
+  transition: all 160ms ease;
+}
+
+.sidebar-link:hover {
+  color: var(--text);
+  border-color: var(--border);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.sidebar-footer {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
 }
 
 .topbar,
@@ -110,14 +178,13 @@ p {
 
 .topbar {
   position: sticky;
-  top: 14px;
+  top: 10px;
   z-index: 30;
   display: flex;
   justify-content: space-between;
   gap: 22px;
   align-items: flex-start;
   padding: 20px 22px;
-  margin-bottom: 24px;
   border-color: rgba(20, 42, 73, 0.2);
   box-shadow: var(--shadow-strong);
 }
@@ -632,6 +699,20 @@ button.danger {
 }
 
 @media (max-width: 1100px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .app-sidebar {
+    position: static;
+    height: auto;
+    grid-template-rows: auto auto auto;
+  }
+
+  .sidebar-nav {
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  }
+
   .topbar {
     position: static;
   }
@@ -643,9 +724,24 @@ button.danger {
 }
 
 @media (max-width: 760px) {
+  .app-shell {
+    width: min(1600px, calc(100vw - 14px));
+    margin: 6px auto 20px;
+  }
+
+  .app-sidebar {
+    border-radius: 18px;
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .sidebar-nav {
+    grid-template-columns: 1fr;
+  }
+
   .shell {
-    width: min(1480px, calc(100vw - 18px));
-    margin: 8px auto 28px;
+    width: min(1480px, calc(100vw - 14px));
+    padding: 0 0 18px;
   }
 
   .topbar,

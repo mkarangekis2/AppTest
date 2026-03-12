@@ -25,79 +25,75 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { user } = await getOptionalUser();
+  const nav = [
+    { href: "/dashboard", label: "Dashboard" },
+    { href: "/onboarding", label: "Onboarding" },
+    { href: "/analysis", label: "Analysis" },
+    { href: "/recommendations", label: "Recommendations" },
+    { href: "/apps", label: "AI Apps" },
+    { href: "/modules", label: "Modules" },
+    { href: "/packages", label: "Packages" },
+    { href: "/industry-packs", label: "Industry Packs" },
+    { href: "/workflows", label: "Workflows" },
+    { href: "/activity", label: "Activity" },
+    { href: "/knowledge", label: "Knowledge" },
+    { href: "/customers", label: "Customers" },
+    { href: "/reports", label: "Reports" },
+    { href: "/integrations", label: "Integrations" },
+    { href: "/settings", label: "Settings" }
+  ] as const;
 
   return (
     <html lang="en">
       <body className={`${headlineFont.variable} ${uiFont.variable}`}>
-        <div className="shell">
-          <header className="topbar">
-            <div className="brand-block">
-              <div className="brand-kicker">
-                <span className="brand-mark">ACG</span>
-                <div className="eyebrow">ACG AI Operations Platform</div>
-                <span className="badge info">Augmentation Consulting Group Inc.</span>
+        <div className="app-shell">
+          <aside className="app-sidebar">
+            <Link href={"/" as Route} className="sidebar-brand">
+              <span className="brand-mark">ACG</span>
+              <div className="stack tight">
+                <div className="eyebrow">Augmentation Consulting Group Inc.</div>
+                <strong>AI Operations Platform</strong>
               </div>
-              <div className="brand-title">Install operational systems that run your business better</div>
-              <div className="brand-copy">
-                Diagnose operational bottlenecks, receive explainable recommendations, and activate modular systems with
-                workflow visibility.
+            </Link>
+            <nav className="sidebar-nav">
+              {nav.map((item) => (
+                <Link key={item.href} className="sidebar-link" href={item.href as Route}>
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+            <div className="sidebar-footer">
+              <span className="badge info">Production-ready</span>
+              <span className="badge ghost">AI-guided operations</span>
+            </div>
+          </aside>
+          <main className="app-main">
+            <header className="topbar">
+              <div className="brand-block">
+                <div className="brand-kicker">
+                  <span className="badge info">ACG Platform</span>
+                  <span className="badge">Install systems, run better operations</span>
+                </div>
+                <div className="brand-title">Build and operate AI-powered business systems</div>
+                <div className="brand-copy">
+                  Onboard your operating model, generate explainable recommendations, install modules, and run AI apps with
+                  full operational visibility.
+                </div>
               </div>
-            </div>
-            <div className="stack tight" style={{ justifyItems: "end" }}>
-              <nav className="topnav">
-                <Link className="nav-link" href={"/" as Route}>
-                  Home
-                </Link>
-                <Link className="nav-link" href={"/dashboard" as Route}>
-                  Dashboard
-                </Link>
-                <Link className="nav-link" href={"/onboarding" as Route}>
-                  Onboarding
-                </Link>
-                <Link className="nav-link" href={"/analysis" as Route}>
-                  Analysis
-                </Link>
-                <Link className="nav-link" href={"/recommendations" as Route}>
-                  Recommendations
-                </Link>
-                <Link className="nav-link" href={"/modules" as Route}>
-                  Modules
-                </Link>
-                <Link className="nav-link" href={"/packages" as Route}>
-                  Packages
-                </Link>
-                <Link className="nav-link" href={"/industry-packs" as Route}>
-                  Industry Packs
-                </Link>
-                <Link className="nav-link" href={"/workflows" as Route}>
-                  Workflows
-                </Link>
-                <Link className="nav-link" href={"/activity" as Route}>
-                  Activity
-                </Link>
-                <Link className="nav-link" href={"/knowledge" as Route}>
-                  Knowledge
-                </Link>
-                <Link className="nav-link" href={"/customers" as Route}>
-                  Customers
-                </Link>
-                <Link className="nav-link" href={"/reports" as Route}>
-                  Reports
-                </Link>
-                <Link className="nav-link" href={"/integrations" as Route}>
-                  Integrations
-                </Link>
-                <Link className="nav-link" href={"/settings" as Route}>
-                  Settings
-                </Link>
-                <Link className="nav-link" href={"/legacy" as Route}>
-                  Legacy
-                </Link>
-              </nav>
-              {user ? <SignOutButton /> : <Link href="/login">Sign in</Link>}
-            </div>
-          </header>
-          {children}
+              <div className="stack tight" style={{ justifyItems: "end" }}>
+                <nav className="topnav">
+                  <Link className="nav-link" href={"/" as Route}>
+                    Home
+                  </Link>
+                  <Link className="nav-link" href={"/apps" as Route}>
+                    AI Apps
+                  </Link>
+                </nav>
+                {user ? <SignOutButton /> : <Link href="/login">Sign in</Link>}
+              </div>
+            </header>
+            <div className="shell">{children}</div>
+          </main>
         </div>
       </body>
     </html>
