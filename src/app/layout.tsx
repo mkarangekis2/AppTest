@@ -47,6 +47,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <Link className="nav-link" href={"/recommendations" as Route}>
                   Recommendations
                 </Link>
+                <Link className="nav-link" href={"/modules" as Route}>
+                  Modules
+                </Link>
+                <Link className="nav-link" href={"/packages" as Route}>
+                  Packages
+                </Link>
                 <Link className="nav-link" href={"/legacy" as Route}>
                   Legacy
                 </Link>
