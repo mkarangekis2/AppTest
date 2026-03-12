@@ -2,6 +2,9 @@ import { requireApiUser } from "@/lib/auth";
 import { parseJsonBody, jsonError } from "@/lib/http";
 import { getLatestCompanyContext } from "@/lib/acg/context";
 import { ensureCatalogSeeded } from "@/lib/acg/catalog-sync";
+import { installModuleWithDefaults } from "@/lib/acg/install";
+import { canInstallMoreModules } from "@/lib/billing/entitlements";
+import { canInstallSystems, getUserRole } from "@/lib/permissions/rbac";
 
 export async function POST(request: Request) {
   const auth = await requireApiUser();
@@ -10,6 +13,10 @@ export async function POST(request: Request) {
   }
 
   const { supabase, user } = auth;
+  const role = getUserRole(user as any);
+  if (!canInstallSystems(role)) {
+    return jsonError("Forbidden.", 403);
+  }
   const body = await parseJsonBody<{ slug?: string; config?: Record<string, unknown> }>(request);
   if (!body.slug) {
     return jsonError("Module slug is required.");
@@ -26,25 +33,18 @@ export async function POST(request: Request) {
     return jsonError("No company profile found. Complete onboarding first.", 404);
   }
 
-  const { data: moduleRow } = await supabase.from("modules").select("id,slug,name").eq("slug", body.slug).maybeSingle();
-  if (!moduleRow) {
-    return jsonError("Module not found.", 404);
+  const entitlement = await canInstallMoreModules(supabase as any, context.company.id);
+  if (!entitlement.allowed) {
+    return jsonError(
+      `Module limit reached for ${entitlement.plan} plan (${entitlement.installedCount}/${entitlement.maxModules}).`,
+      403
+    );
   }
 
-  const { error } = await supabase.from("module_installations").upsert(
-    {
-      company_id: context.company.id,
-      module_id: moduleRow.id,
-      status: "installed",
-      config_json: body.config || {},
-      updated_at: new Date().toISOString()
-    },
-    { onConflict: "company_id,module_id" }
-  );
-
-  if (error) {
-    return jsonError(error.message, 500);
+  try {
+    const installed = await installModuleWithDefaults(supabase as any, context.company.id, body.slug, body.config || {});
+    return Response.json({ ok: true, module: installed.moduleRow, workflowsInitialized: installed.workflowCount });
+  } catch (error) {
+    return jsonError(error instanceof Error ? error.message : "Module install failed.", 500);
   }
-
-  return Response.json({ ok: true, module: moduleRow });
 }

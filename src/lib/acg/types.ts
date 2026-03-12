@@ -62,8 +62,18 @@ export type PackageDefinition = {
   bestFit?: string;
 };
 
+export type IndustryPackDefinition = {
+  slug: string;
+  name: string;
+  industries: string[];
+  description: string;
+  includedModuleSlugs: string[];
+  defaultWorkflowTemplates: string[];
+  kpiPresets: string[];
+};
+
 export type RecommendationItem = {
-  recommendationType: "module" | "package";
+  recommendationType: "module" | "package" | "industry_pack";
   slug: string;
   title: string;
   problemSolved: string;

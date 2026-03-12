@@ -5,6 +5,7 @@ export type RecommendationRule = {
   when: (input: OnboardingPayload) => boolean;
   recommendModuleSlugs?: string[];
   recommendPackageSlugs?: string[];
+  recommendIndustryPackSlugs?: string[];
   reason: (input: OnboardingPayload) => string;
   impact: "low" | "medium" | "high";
 };
@@ -15,6 +16,7 @@ export const BASE_RECOMMENDATION_RULES: RecommendationRule[] = [
     when: (input) => input.leadVolume >= 50,
     recommendModuleSlugs: ["lead-capture-automation", "lead-qualification-ai", "follow-up-automation"],
     recommendPackageSlugs: ["lead-conversion-improvement-package"],
+    recommendIndustryPackSlugs: ["professional-services-pack"],
     reason: (input) =>
       `Lead volume is ${input.leadVolume}/month, which indicates response and follow-up automation will reduce pipeline leakage.`,
     impact: "high"
@@ -32,6 +34,7 @@ export const BASE_RECOMMENDATION_RULES: RecommendationRule[] = [
     when: (input) => input.supportVolume >= 40 || input.supportComplexity === "high",
     recommendModuleSlugs: ["support-ticket-triage", "sla-risk-alerts", "customer-sentiment-detection"],
     recommendPackageSlugs: ["service-delivery-consistency-package"],
+    recommendIndustryPackSlugs: ["it-managed-services-pack"],
     reason: (input) =>
       `Support load (${input.supportVolume}/month) and complexity indicate triage automation should be prioritized.`,
     impact: "high"
@@ -58,6 +61,41 @@ export const BASE_RECOMMENDATION_RULES: RecommendationRule[] = [
     recommendModuleSlugs: ["revenue-leak-detection", "quote-follow-up-automation"],
     recommendPackageSlugs: ["revenue-growth-package"],
     reason: () => "Stale quotes and follow-up leakage indicate direct revenue recovery opportunity.",
+    impact: "high"
+  },
+  {
+    id: "industry-construction-trades",
+    when: (input) => /construction|trades|contractor/i.test(input.industry),
+    recommendIndustryPackSlugs: ["construction-trades-pack"],
+    reason: () => "Industry profile indicates construction/trades workflows and KPIs should be preconfigured.",
+    impact: "high"
+  },
+  {
+    id: "industry-staffing",
+    when: (input) => /staffing|recruiting|talent/i.test(input.industry),
+    recommendIndustryPackSlugs: ["staffing-recruiting-pack"],
+    reason: () => "Industry profile indicates recruiting pipeline automation should be preconfigured.",
+    impact: "high"
+  },
+  {
+    id: "industry-accounting",
+    when: (input) => /accounting|bookkeeping|advisory/i.test(input.industry),
+    recommendIndustryPackSlugs: ["accounting-advisory-pack"],
+    reason: () => "Industry profile indicates accounting-focused cash and documentation controls should be preconfigured.",
+    impact: "high"
+  },
+  {
+    id: "industry-logistics",
+    when: (input) => /logistics|transportation|freight/i.test(input.industry),
+    recommendIndustryPackSlugs: ["logistics-transportation-pack"],
+    reason: () => "Industry profile indicates logistics coordination and delay mitigation workflows should be preconfigured.",
+    impact: "high"
+  },
+  {
+    id: "industry-it-msp",
+    when: (input) => /it services|managed services|msp/i.test(input.industry),
+    recommendIndustryPackSlugs: ["it-managed-services-pack"],
+    reason: () => "Industry profile indicates support/SLA controls and renewal workflows should be preconfigured.",
     impact: "high"
   }
 ];

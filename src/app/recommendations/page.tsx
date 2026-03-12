@@ -60,6 +60,19 @@ export default async function RecommendationsPage() {
                 <div>{item.reason}</div>
               </div>
               <div className="muted">Setup estimate: {item.setupEstimate}</div>
+              {item.requiredIntegrations.length ? (
+                <div className="muted">Integrations: {item.requiredIntegrations.join(", ")}</div>
+              ) : null}
+              {Array.isArray(item.evidence.includedModules) ? (
+                <div className="packet-block">
+                  <div className="eyebrow">Included modules</div>
+                  <ul className="list-tight">
+                    {(item.evidence.includedModules as string[]).map((moduleSlug) => (
+                      <li key={moduleSlug}>{moduleSlug}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
             </article>
           ))}
         </section>
